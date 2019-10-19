@@ -20,7 +20,8 @@ class FileParser
     end
   end
 
-  def save_file(output_path, rows)
+  def save_file(rows, output_path=nil)
+    output_path = output_path == nil ? @path : output_path
     File.open(output_path + @file_name, "w", col_sep: "\t") do |f|
       f.write(rows.inject([]) { |csv, row| csv << CSV.generate_line(row, col_sep: "\t") }.join(""))
     end

@@ -7,9 +7,9 @@ class Gene
 
   def initialize(gene_id = "AT0G00000", gene_name = "newgene", mutant_phenotype = "Description")
     @linked_genes = []
-    @gene_id = gene_id
+    @gene_id = gene_id.upcase
 
-    if gene_id =~ /A[Tt]\d[Gg]\d\d\d\d\d/
+    if gene_id =~ /AT\dG\d{5}/
       @gene_id = gene_id
     else
       abort("The gene ID should have the right format (ATxGxxxxx), where x is a number")
