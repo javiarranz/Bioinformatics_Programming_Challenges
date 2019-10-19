@@ -28,9 +28,9 @@ class Gene
       linked = ''
       @linked_genes.each {|gene| linked += "#{gene.gene_name} (#{gene.gene_id}), "}
       linked = linked.delete_suffix!(', ')
-      puts "Gene #{@gene_name} (#{@gene_id}) ==> #{@mutant_phenotype} and is linked to #{linked}"
+      puts "\tGene #{@gene_name} (#{@gene_id}) ==> #{@mutant_phenotype} and is linked to #{linked}"
     else
-      puts "Gene #{@gene_name} (#{@gene_id}) ==> #{@mutant_phenotype}"
+      puts "\tGene #{@gene_name} (#{@gene_id}) ==> #{@mutant_phenotype}"
     end
   end
 

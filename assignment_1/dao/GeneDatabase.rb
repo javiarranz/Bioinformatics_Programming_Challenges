@@ -3,7 +3,7 @@ class GeneDatabase
   attr_accessor :genes_list
 
   def initialize()
-   puts "Initiliazing Gene Database"
+   puts "...Initiliazing Gene Database => Done"
    @genes_list = []
   end
 
@@ -20,7 +20,7 @@ class GeneDatabase
   end
 
   def print()
-    puts '------------Genes Table------------'
+    puts "\t------------Genes Table------------"
     @genes_list.each { |gene| gene.print() }
   end
 end

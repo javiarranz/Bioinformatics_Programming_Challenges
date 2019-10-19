@@ -4,7 +4,7 @@ class HybridDatabase
 
   def initialize()
 
-    puts "Initiliazing Hybrid Database"
+    puts "...Initiliazing Hybrid Database => Done"
     @hybrid_list = []
   end
 
@@ -13,7 +13,7 @@ class HybridDatabase
   end
 
   def print()
-    puts "\n\n------------Hybrid Cross Table------------"
+    puts "\t------------Hybrid Cross Table------------"
     @hybrid_list.each { |hybrid| hybrid.print() }
   end
 

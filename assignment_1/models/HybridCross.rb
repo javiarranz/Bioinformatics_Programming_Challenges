@@ -1,5 +1,5 @@
-require_relative 'seed_stock'
-require_relative 'gene'
+require_relative 'SeedStock'
+require_relative 'Gene'
 
 class HybridCross
 
@@ -21,7 +21,7 @@ class HybridCross
 
 
   def print
-    puts "Hybrid Cross Parent 1: #{@parent1.seed_stock}, Parent 2: #{@parent2.seed_stock}, f2_wild: #{@f2_wild}, f2_p1: #{@f2_p1}, f2_p2: #{@f2_p2}, f2_p1p2: #{@f2_p1p2}"
+    puts "\tHybrid Cross Parent 1: #{@parent1.seed_stock}, Parent 2: #{@parent2.seed_stock}, f2_wild: #{@f2_wild}, f2_p1: #{@f2_p1}, f2_p2: #{@f2_p2}, f2_p1p2: #{@f2_p1p2}"
   end
 
 
@@ -39,7 +39,7 @@ class HybridCross
     # puts "Chi_square for [#{@parent1.seed_stock}, #{@parent2.seed_stock}] ==> #{chi_square}"
 
     if chi_square >= get_chi_square(degrees, probability) # This is the value that tell us if the genes are linked or not
-      puts "*\t=========> Recording: #{@parent1.gene.to_s} is genetically linked to #{@parent2.gene.to_s} with chisquare score #{chi_square}"
+      puts "\tRecording: #{@parent1.gene.gene_id} is genetically linked to #{@parent2.gene.gene_id} with chisquare score #{chi_square}"
       @parent1.gene.add_linked_gene(@parent2.gene)
       @parent2.gene.add_linked_gene(@parent1.gene)
     end
@@ -58,8 +58,12 @@ class HybridCross
         return 6.63
       when 0.001
         return 10.83
+      else
+        raise "Chi Square value not found for 1 degrees and #{probability} probability"
       end
+    else
+      raise "Chi Square value not found for #{degrees} degrees"
     end
-    raise "Chi Square value not found for #{degrees} degrees and #{probability} probability"
+
   end
 end

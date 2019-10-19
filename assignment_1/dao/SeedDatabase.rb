@@ -4,7 +4,7 @@ class SeedDatabase
 
   def initialize()
 
-    puts "Initiliazing Seed Database"
+    puts "...Initiliazing Seed Database => Done"
     @seed_list = []
   end
 
@@ -12,7 +12,7 @@ class SeedDatabase
     @seed_list.append(seed)
   end
 
-  def get_seed(seed_name)
+  def get_seed_stock(seed_name)
     @seed_list.each do |seed|
       if seed.seed_stock == seed_name
         return seed
@@ -21,7 +21,7 @@ class SeedDatabase
   end
 
   def print()
-    puts "\n\n------------Seed Table------------"
+    puts "\t------------Seed Table------------"
     @seed_list.each { |seed| seed.print() }
   end
 
@@ -43,5 +43,10 @@ class SeedDatabase
       list.append([seed.seed_stock, seed.gene.gene_id, seed.last_planted, seed.storage, seed.grams_remaining])
     end
     list
+  end
+
+  def write_database(file, headers)
+    new_seed_rows = seed_list_serializer.unshift(headers)
+    file.save_file(new_seed_rows)
   end
 end
