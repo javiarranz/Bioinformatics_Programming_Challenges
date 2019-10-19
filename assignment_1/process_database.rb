@@ -14,13 +14,13 @@ def parse_args(input_array)
   input_array.each do |tsv_file|
     case tsv_file
     when 'gene_information.tsv'
-      gene_information = File_Parser.new(path_fixtures, tsv_file)
+      gene_information = FileParser.new(path_fixtures, tsv_file)
     when 'seed_stock_data.tsv'
-      seed_stock_data = File_Parser.new(path_fixtures, tsv_file)
+      seed_stock_data = FileParser.new(path_fixtures, tsv_file)
     when 'cross_data.tsv'
-      cross_data = File_Parser.new(path_fixtures, tsv_file)
+      cross_data = FileParser.new(path_fixtures, tsv_file)
     when 'new_stock_file.tsv'
-      new_stock_file = File_Parser.new(path_fixtures, tsv_file, false)
+      new_stock_file = FileParser.new(path_fixtures, tsv_file, false)
     else
       puts "Document Not Found: #{tsv_file}"
     end
@@ -95,7 +95,7 @@ genebank then you should update the genebank information to show the new quantit
 after a planting. The new state of the genebank should be printed to a new file, using exactly the same
 format as the original file seed_stock_data.tsv\n\n"
 
-new_seed_rows = [['Seed_Stock', 'Mutant_Gene_ID', 'Last_Planted', 'Storage', 'Grams_Remaining']]
+new_seed_rows = [seed_stock_data.headers]
 seed_list.each do |seed|
   seed.extract_grams(7, "24/10/2019")
   new_seed_rows.push([seed.seed_stock, seed.gene.gene_id, seed.last_planted, seed.storage, seed.grams_remaining])
@@ -106,8 +106,7 @@ end
 
 #new_stock_file.save_file(new_seed_rows)
 
-csv_str = new_seed_rows.inject([]) { |csv, row| csv << CSV.generate_line(row).split("\t") }.join("")
-File.open("new_stock_file.tsv", "w", col_sep: ",") { |f| f.write(new_seed_rows.inject([]) { |csv, row| csv << CSV.generate_line(row) }.join("")) }
+new_stock_file.save_file('./assignment_1/output/', new_seed_rows)
 
 puts "\n\n\n\n\n"
 #puts csv_str
