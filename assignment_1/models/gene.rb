@@ -3,8 +3,10 @@ class Gene
   attr_accessor :gene_id
   attr_accessor :gene_name
   attr_accessor :mutant_phenotype
+  attr_accessor :linked_genes
 
   def initialize(gene_id = "AT0G00000", gene_name = "newgene", mutant_phenotype = "Description")
+    @linked_genes = []
     @gene_id = gene_id
 
     if gene_id =~ /A[Tt]\d[Gg]\d\d\d\d\d/
@@ -17,8 +19,19 @@ class Gene
     @mutant_phenotype = mutant_phenotype
   end
 
-  def print
-    puts "Gene #{@gene_name} (#{@gene_id}) ==> #{@mutant_phenotype}"
+  def add_linked_gene(gene)
+    @linked_genes.append(gene)
+  end
+
+  def print(linked = false)
+    if linked
+      linked = ''
+      @linked_genes.each {|gene| linked += "#{gene.gene_name} (#{gene.gene_id}), "}
+      linked = linked.delete_suffix!(', ')
+      puts "Gene #{@gene_name} (#{@gene_id}) ==> #{@mutant_phenotype} and is linked to #{linked}"
+    else
+      puts "Gene #{@gene_name} (#{@gene_id}) ==> #{@mutant_phenotype}"
+    end
   end
 
 

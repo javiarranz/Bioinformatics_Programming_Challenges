@@ -75,10 +75,10 @@ end
 cross_data_rows = cross_data.rows
 cross_list = []
 cross_data_rows.each do |row|
-  cross_list.push(Hybrid_Cross.new(row['Parent1'], row['Parent2'], row['F2_Wild'],
-                                   row['F2_P1'], row['F2_P2'], row['F2_P1P2']))
   seed_parent1 = get_seed_stock(seed_list, row['Parent1'])
   seed_parent2 = get_seed_stock(seed_list, row['Parent2'])
+  cross_list.push(HybridCross.new(seed_parent1, seed_parent2, row['F2_Wild'],
+                                  row['F2_P1'], row['F2_P2'], row['F2_P1P2']))
 end
 #puts cross_list
 
@@ -121,7 +121,7 @@ other).
 
 cross_list.each do |cross|
   #puts cross.print
-  cross.chi_square(cross)
+  cross.chi_square()
 end
 
 puts "\n\n\n\n\nfinish"
