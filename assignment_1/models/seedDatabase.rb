@@ -26,7 +26,6 @@ class SeedDatabase
   end
 
   def extract_grams(value, date, seed_stock = nil)
-    seed_stock
     @seed_list.each do |seed|
       if seed_stock
         if seed_stock == seed.seed_stock

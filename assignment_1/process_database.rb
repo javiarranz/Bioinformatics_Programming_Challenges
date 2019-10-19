@@ -4,6 +4,7 @@ require './assignment_1/lib/Assignment_1'
 assignment_1 = Assignment1.new(ARGV)
 
 assignment_1.exercise_1
+assignment_1.exercise_2
 # START
 #gene_information, seed_stock_data, cross_data, new_stock_file = parse_args(ARGV)
 #

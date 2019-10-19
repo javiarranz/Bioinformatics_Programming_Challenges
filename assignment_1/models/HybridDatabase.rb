@@ -16,4 +16,11 @@ class HybridDatabase
     puts "\n\n------------Hybrid Cross Table------------"
     @hybrid_list.each { |hybrid| hybrid.print() }
   end
+
+  def calculate_chi_square()
+    @hybrid_list.each do |cross|
+      #puts cross.print
+      cross.chi_square()
+    end
+  end
 end

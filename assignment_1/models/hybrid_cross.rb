@@ -25,7 +25,7 @@ class HybridCross
   end
 
 
-  def chi_square()
+  def chi_square(degrees = 1, probability = 0.05)
     #Sumatorio(observados-esperados)^2/esperados
 
     total = @f2_wild + @f2_p1 + @f2_p2 + @f2_p1p2
@@ -36,24 +36,30 @@ class HybridCross
 
     chi_square = (((@f2_wild - cq1) ** 2) / cq1 + ((@f2_p1 - cq2) ** 2) / cq2 + ((@f2_p2 - cq3) ** 2) / cq3 + ((@f2_p1p2 - cq4) ** 2) / cq4).to_f
 
-    puts "Chi_square for [#{@parent1.seed_stock}, #{@parent2.seed_stock}] ==> #{chi_square}"
+    # puts "Chi_square for [#{@parent1.seed_stock}, #{@parent2.seed_stock}] ==> #{chi_square}"
 
-    if chi_square >= 3.84 # This is the value that tell us if the genes are linked or not
-
-      puts "*\t=========> MATCH!"
+    if chi_square >= get_chi_square(degrees, probability) # This is the value that tell us if the genes are linked or not
       puts "*\t=========> Recording: #{@parent1.gene.to_s} is genetically linked to #{@parent2.gene.to_s} with chisquare score #{chi_square}"
-
       @parent1.gene.add_linked_gene(@parent2.gene)
       @parent2.gene.add_linked_gene(@parent1.gene)
-
-      @parent1.gene.print(true)
-      @parent2.gene.print(true)
-      #cross.@seed_stock.parent1.chi_square = cross.parent2.gene_name
-      # We change the 'linked' property of the instance ('linked' = instance of the gene to which is linked)
-      #cross.parent2.gene.gene_name.chi_square = cross.parent1.gene_name
-      # Do the same thing in the linked gene
     end
   end
 
 
+  private
+
+  def get_chi_square(degrees = 1, probability = 0.05)
+    case degrees
+    when 1
+      case probability
+      when 0.05
+        return 3.84
+      when 0.01
+        return 6.63
+      when 0.001
+        return 10.83
+      end
+    end
+    raise "Chi Square value not found for #{degrees} degrees and #{probability} probability"
+  end
 end

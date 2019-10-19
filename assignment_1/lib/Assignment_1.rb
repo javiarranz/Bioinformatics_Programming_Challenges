@@ -26,17 +26,28 @@ class Assignment1
   end
 
   def exercise_1()
-    puts "\n\n\n----------------EXERCISES------------------\n\n"
-    puts "Exercice 1) 'simulate' planting 7 grams of seeds from each of the records in the seed stock genebank then you should update the genebank information to show the new quantity of seeds that remain after a planting. The new state of the genebank should be printed to a new file, using exactly the same format as the original file seed_stock_data.tsv\n\n"
+    puts "\n\n----------------EXERCISES------------------\n\n"
+    puts %( ** Exercise 1 **
+Simulate' planting 7 grams of seeds from each of the records in the seed stock genebank,
+then you should update the genebank information to show the new quantity of seeds that remain after a planting.
+The new state of the genebank should be printed to a new file, using exactly the same format as the original file seed_stock_data.tsv
+-------------------------------------------------------------------------------------------------------------------------------------")
     @seed_database.extract_grams(7, "24/10/2019")
-    new_seed_rows = @seed_database.seed_list_serializer()
+    new_seed_rows = @seed_database.seed_list_serializer
     new_seed_rows = new_seed_rows.unshift(@seed_stock_data.headers)
     new_stock_file.save_file(new_seed_rows)
   end
-  #
-  # def exercise_2()
-  #
-  # end
+
+  def exercise_2()
+
+    puts %( ** Exercise 2 **
+Process the information in cross_data.tsv and determine which genes are genetically-linked.
+To achieve this, you will have to do a Chi-square test on the F2 cross data.
+If you discover genes that are linked, this information should be added as a property of each of the genes
+(they are both linked to each other).)
+    @hybrid_database.calculate_chi_square
+    @gene_database.print
+  end
 
   def print_tables()
     @gene_database.print
@@ -48,10 +59,6 @@ class Assignment1
 
   def parse_args(input_array)
     # Initialize variables
-    gene_information = nil
-    seed_stock_data = nil
-    cross_data = nil
-    new_stock_file = nil
     path_fixtures = './assignment_1/fixtures'
     path_output = './assignment_1/output/'
 

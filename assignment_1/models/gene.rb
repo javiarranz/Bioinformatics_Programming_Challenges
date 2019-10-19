@@ -16,15 +16,15 @@ class Gene
     end
 
     @gene_name = gene_name
-    @mutant_phenotype = mutant_phenotype
+    @mutant_phenotype = mutant_phenotype.gsub("\n", '')
   end
 
   def add_linked_gene(gene)
     @linked_genes.append(gene)
   end
 
-  def print(linked = false)
-    if linked
+  def print()
+    if @linked_genes.length > 0
       linked = ''
       @linked_genes.each {|gene| linked += "#{gene.gene_name} (#{gene.gene_id}), "}
       linked = linked.delete_suffix!(', ')
