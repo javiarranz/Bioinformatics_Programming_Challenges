@@ -2,7 +2,7 @@ Bioinformatics Programming Challenges
 =====
 ### **Assignment 1**
 ###### Development started on 11 - October - 2019
-###### Development finished on 19 - October - 2019
+###### Development finished on 19 - October - 2019 -  Merged to Master
 Execute Exercise with:
 ```
 $ ruby process_database.rb  gene_information.tsv  seed_stock_data.tsv  cross_data.tsv  new_stock_file.tsv
