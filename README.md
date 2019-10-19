@@ -1,2 +1,16 @@
-# Bioinformatics_Programming_Challenges
-A folder to upload the tasks for this subject
+Bioinformatics Programming Challenges
+=====
+**Assignment 1**
+
+Develop on October 2019
+
+Master since: XXXXXXX
+```
+ruby process_database.rb  gene_information.tsv  seed_stock_data.tsv  cross_data.tsv  new_stock_file.tsv
+```
+
+
+**Assignment 2**
+```
+TO DO
+```
