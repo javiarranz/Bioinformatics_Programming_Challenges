@@ -67,6 +67,55 @@
         <root url="file://C:/Ruby26-x64/lib/ruby/2.6.0/csv/core_ext" />
       </excluded>
     </library>
+    <library name="debase (v0.2.4.1, ruby-2.6.5-p114) [gem]" type="rubylib">
+      <properties>
+        <option name="version" value="4" />
+      </properties>
+      <CLASSES>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.2.4.1/ext" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.2.4.1/lib" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.2.4.1/test" />
+      </CLASSES>
+      <SOURCES>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.2.4.1/ext" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.2.4.1/lib" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.2.4.1/test" />
+      </SOURCES>
+      <excluded>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.2.4.1/ext" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.2.4.1/test" />
+      </excluded>
+    </library>
+    <library name="debase (v0.3.0.beta8, ruby-2.6.5-p114) [gem]" type="rubylib">
+      <properties>
+        <option name="version" value="4" />
+      </properties>
+      <CLASSES>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.3.0.beta8/ext" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.3.0.beta8/lib" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.3.0.beta8/test" />
+      </CLASSES>
+      <SOURCES>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.3.0.beta8/ext" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.3.0.beta8/lib" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.3.0.beta8/test" />
+      </SOURCES>
+      <excluded>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.3.0.beta8/ext" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-0.3.0.beta8/test" />
+      </excluded>
+    </library>
+    <library name="debase-ruby_core_source (v0.10.6, ruby-2.6.5-p114) [gem]" type="rubylib">
+      <properties>
+        <option name="version" value="4" />
+      </properties>
+      <CLASSES>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-ruby_core_source-0.10.6/lib" />
+      </CLASSES>
+      <SOURCES>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/debase-ruby_core_source-0.10.6/lib" />
+      </SOURCES>
+    </library>
     <library name="did_you_mean (v1.3.0, ruby-2.6.5-p114) [gem]" type="rubylib">
       <properties>
         <option name="version" value="4" />
@@ -350,6 +399,25 @@
         <root url="file://C:/Ruby26-x64/lib/ruby/2.6.0/rss/maker" />
         <root url="file://C:/Ruby26-x64/lib/ruby/2.6.0/rss/content" />
         <root url="file://C:/Ruby26-x64/lib/ruby/2.6.0/rss/dublincore" />
+      </excluded>
+    </library>
+    <library name="ruby-debug-ide (v0.8.0.beta8, ruby-2.6.5-p114) [gem]" type="rubylib">
+      <properties>
+        <option name="version" value="4" />
+      </properties>
+      <CLASSES>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/ruby-debug-ide-0.8.0.beta8/bin" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/ruby-debug-ide-0.8.0.beta8/ext" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/ruby-debug-ide-0.8.0.beta8/lib" />
+      </CLASSES>
+      <SOURCES>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/ruby-debug-ide-0.8.0.beta8/bin" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/ruby-debug-ide-0.8.0.beta8/ext" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/ruby-debug-ide-0.8.0.beta8/lib" />
+      </SOURCES>
+      <excluded>
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/ruby-debug-ide-0.8.0.beta8/bin" />
+        <root url="file://C:/Ruby26-x64/lib/ruby/gems/2.6.0/gems/ruby-debug-ide-0.8.0.beta8/ext" />
       </excluded>
     </library>
     <library name="shell (v0.7, ruby-2.6.5-p114) [gem]" type="rubylib">
