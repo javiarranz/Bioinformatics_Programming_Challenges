@@ -1,11 +1,12 @@
 require "csv"
 
-class File_Parser
+class FileParser
 
   attr_accessor :path
   attr_accessor :file_name
   attr_accessor :content
   attr_accessor :rows
+  attr_accessor :headers
 
   def initialize(path, file_name, parse = true)
     @path = path
@@ -19,13 +20,10 @@ class File_Parser
     end
   end
 
-  def save_file(rows)
-    rows.each do |row|
-      File.open(@path + '/new/' + @file_name, 'w', col_sep: "\t") do |new_csv|
-        new_csv.write(rows) { |csv| csv << CSV.generate_line(row) }.join("")
-        # #new_csv << row + line.join("\t")
-
-      end
+  def save_file(rows, output_path=nil)
+    output_path = output_path == nil ? @path : output_path
+    File.open(output_path + @file_name, "w", col_sep: "\t") do |f|
+      f.write(rows.inject([]) { |csv, row| csv << CSV.generate_line(row, col_sep: "\t") }.join(""))
     end
   end
 
@@ -43,7 +41,7 @@ class File_Parser
   def parse()
     rows = []
     open(@path + '/' + @file_name) do |f|
-      headers = f.gets.strip.split("\t")
+      @headers = f.gets.strip.split("\t")
       f.each do |line|
         rows.push(Hash[headers.zip(line.split("\t"))])
         # yield fields
