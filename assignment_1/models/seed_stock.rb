@@ -47,7 +47,4 @@ class SeedStock
     @grams_remaining += value
   end
 
-  def get_serializer()
-    [@seed_stock, @gene_id, @last_planted, @storage, @grams_remaining]
-  end
 end

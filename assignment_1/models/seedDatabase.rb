@@ -25,24 +25,24 @@ class SeedDatabase
     @seed_list.each { |seed| seed.print() }
   end
 
-  def extract_grams(value, date, seed_id=nil)
-    if seed_id
-      puts seed_id
-    else
-      #TODO print seed_list before
-      @seed_list.each do |seed|
-        seed.extract_grams(7, "24/10/2019")
-        #new_seed_rows.push([seed.seed_stock, seed.gene.gene_id, seed.last_planted, seed.storage, seed.grams_remaining])
+  def extract_grams(value, date, seed_stock = nil)
+    seed_stock
+    @seed_list.each do |seed|
+      if seed_stock
+        if seed_stock == seed.seed_stock
+          return seed.extract_grams(value, date)
+        end
+      else
+        seed.extract_grams(value, date)
       end
-      #TODO print seed_list after
     end
-
   end
 
   def seed_list_serializer()
     list = []
     @seed_list.each do |seed|
-      list.append(seed.get_serializer())
+      list.append([seed.seed_stock, seed.gene.gene_id, seed.last_planted, seed.storage, seed.grams_remaining])
     end
+    list
   end
 end
