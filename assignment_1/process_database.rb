@@ -1,7 +1,7 @@
-require '../assignment_1/lib/utils/file_parser'
-require '../assignment_1/lib/gene'
-require '../assignment_1/lib/hybrid_cross'
-require '../assignment_1/lib/seed_stock'
+require './assignment_1/lib/file_parser'
+require './assignment_1/models/gene'
+require './assignment_1/models/hybrid_cross'
+require './assignment_1/models/seed_stock'
 
 def parse_args(input_array)
   # Initialize variables
@@ -9,18 +9,18 @@ def parse_args(input_array)
   seed_stock_data = nil
   cross_data = nil
   new_stock_file = nil
-
+  path_fixtures = './assignment_1/fixtures'
   # Iterate args
   input_array.each do |tsv_file|
     case tsv_file
     when 'gene_information.tsv'
-      gene_information = File_Parser.new('fixtures', tsv_file)
+      gene_information = File_Parser.new(path_fixtures, tsv_file)
     when 'seed_stock_data.tsv'
-      seed_stock_data = File_Parser.new('fixtures', tsv_file)
+      seed_stock_data = File_Parser.new(path_fixtures, tsv_file)
     when 'cross_data.tsv'
-      cross_data = File_Parser.new('fixtures', tsv_file)
+      cross_data = File_Parser.new(path_fixtures, tsv_file)
     when 'new_stock_file.tsv'
-      new_stock_file = File_Parser.new('fixtures', tsv_file, false)
+      new_stock_file = File_Parser.new(path_fixtures, tsv_file, false)
     else
       puts "Document Not Found: #{tsv_file}"
     end
@@ -100,7 +100,6 @@ seed_list.each do |seed|
   seed.extract_grams(7, "24/10/2019")
   new_seed_rows.push([seed.seed_stock, seed.gene.gene_id, seed.last_planted, seed.storage, seed.grams_remaining])
 end
-
 
 
 #puts new_seed_rows
