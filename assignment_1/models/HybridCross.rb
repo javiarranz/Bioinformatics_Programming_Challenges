@@ -91,3 +91,4 @@ class HybridCross
       raise "Chi Square value not found for #{degrees} degrees"
     end
   end
+end
