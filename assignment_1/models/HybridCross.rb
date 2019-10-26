@@ -48,7 +48,7 @@ class HybridCross
 
   private
 
-  def get_chi_square(degrees = 1, probability = 0.05)
+  def get_chi_square(degrees = 3, probability = 0.05)
     case degrees
     when 1
       case probability
@@ -61,9 +61,34 @@ class HybridCross
       else
         raise "Chi Square value not found for 1 degrees and #{probability} probability"
       end
+
+    when 2
+      case probability
+      when 0.05
+        return 5.991
+      when 0.01
+        return 9.21
+      when 0.001
+        return 13.816
+      else
+        raise "Chi Square value not found for 2 degrees and #{probability} probability"
+      end
+
+    when 3
+      case probability
+      when 0.05
+        return 7.815
+      when 0.01
+        return 11.345
+      when 0.001
+        return 16.266
+      else
+        raise "Chi Square value not found for 3 degrees and #{probability} probability"
+      end
+
+
     else
       raise "Chi Square value not found for #{degrees} degrees"
     end
-
   end
 end
