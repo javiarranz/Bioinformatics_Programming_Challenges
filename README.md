@@ -1,5 +1,14 @@
 Bioinformatics Programming Challenges
 =====
+
+
+
+### **Preinstall RUby Gems**
+
+```
+$ bundle install
+```
+
 ### **Assignment 1**
 ###### Development started on 11 - October - 2019
 ###### Development finished on 19 - October - 2019 -  Merged to Master
@@ -17,6 +26,13 @@ On this exercise I have created:
 
 
 ### **Assignment 2**
+
+Requirements:
+- gem rest-client
+
 ```
 TO DO
+
+MODIFY Test File!!!!
 ```
+
