@@ -29,7 +29,7 @@ On this exercise I have created:
 
 Requirements:
 - gem rest-client
-
+- sqlite3
 ```
 TO DO
 
