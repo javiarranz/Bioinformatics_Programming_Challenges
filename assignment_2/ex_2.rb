@@ -1,11 +1,11 @@
-require './assignment_1/lib/Assignment_1'
+require '../assignment_2/lib/Assignment_2'
 
 
-assignment_1 = Assignment1.new(ARGV)
+assignment_2 = Assignment2.new(ARGV)
 
 puts "\n\n----------------EXERCISES------------------"
-assignment_1.exercise_1
-assignment_1.exercise_2
+assignment_2.exercise_1
+assignment_2.exercise_2
 puts "\n\n----------------BONUS POINTS------------------"
-assignment_1.bonus_1
-assignment_1.bonus_2
+assignment_2.bonus_1
+assignment_2.bonus_2
