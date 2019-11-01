@@ -1,10 +1,14 @@
+require 'rest-client'
 require './assignment_2/lib/EbiDbfetchApi'
+require './assignment_2/lib/TogoRestApi'
 require './assignment_2/lib/file_parser'
 require './assignment_2/dao/GeneDatabase'
 require './assignment_2/models/Gene'
 
+
 class Assignment2
   attr_reader :ebi_api
+  attr_reader :togo_api
   attr_reader :arabidopsis_genelist
 
   attr_reader :gene_database
@@ -12,7 +16,9 @@ class Assignment2
   def initialize(arguments)
     puts "Start First Assignment"
     @ebi_api = EbiDbfetchApi.new
+    @togo_api = TogoRestApi.new
     @gene_database = GeneDatabase.new
+
 
     path_fixtures = './assignment_2/fixtures'
     @arabidopsis_genelist = FileParser.new(path_fixtures, 'test_ArabidopsisSubNetwork_GeneList.tsv')
@@ -22,21 +28,29 @@ class Assignment2
     # @gene_database.print
   end
 
+
+
   def exercise_1()
     puts %(\n\n** Exercise 1 **
 
 -------------------------------------------------------------------------------------------------------------------------------------\n\n)
-   genes_list = @gene_database.genes_list
+    genes_list = @gene_database.genes_list
+    puts genes_list
 
-    genes_list.each do |gene|
-      dbfetch = @ebi_api.get("ensemblgenomesgene", "embl", gene.gene_id, "raw")
-      gene.ebi_dbfetch = dbfetch
-    end
+    # genes_list.each do |gene|
+    #   ebifetch = @ebi_api.get("ensemblgenomesgene", "embl", gene.gene_id, "raw")
+    #   gene.ebi_dbfetch = ebifetch
 
-    n_gene = @gene_database.get_gene("AT4g27030")
 
-    puts n_gene.ebi_dbfetch
+
+      #togofetch = @togo_api("kegg-genes", gene.gene_id)
+      #gene.togo_dbfetch = togofetch
+    #end
+
+    n_gene = @gene_database.get_gene("AT5G54270")
+    puts n_gene
   end
+
 
   def exercise_2()
 
@@ -61,5 +75,5 @@ class Assignment2
     puts "\t----- SOLUTION -----"
 
   end
-
 end
+

@@ -14,12 +14,19 @@ class GeneDatabase
   end
 
   def add_gene(gene)
-    # @genes_list.append(gene)
+    @genes_list.append(gene)
     # TODO change this to ORM to prevent SQL Injection
-    query = "INSERT INTO #{@geneTable} VALUES ('#{gene.gene_id}','#{gene.gene_name}')"
+    #query = "Delete from #{@geneTable}"
+    query = "INSERT INTO #{@geneTable} VALUES ('#{gene.gene_id}','','')"
     @sqllite.execute(query)
-
   end
+
+  def delete_gene(gene)
+    # TODO change this to ORM to prevent SQL Injection
+    query = "DELETE from #{@geneTable} WHERE id = #{gene.gene_id}"
+    @sqllite.execute(query)
+  end
+
 
   def get_gene(gene_id)
     # TODO get from Database and create the Gene

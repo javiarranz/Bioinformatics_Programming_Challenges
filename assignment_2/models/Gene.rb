@@ -5,6 +5,8 @@ class Gene
   attr_accessor :mutant_phenotype
   attr_accessor :linked_genes
   attr_accessor :ebi_dbfetch
+  attr_accessor :togo_dbfetch
+
 
   def initialize(gene_id = "AT0G00000", gene_name = "", mutant_phenotype = "")
     @linked_genes = []
@@ -32,7 +34,6 @@ class Gene
 
   def print()
     message = "\tGene "
-
 
     if @gene_name != @gene_id
       message += "#{@gene_name} (#{@gene_id})"

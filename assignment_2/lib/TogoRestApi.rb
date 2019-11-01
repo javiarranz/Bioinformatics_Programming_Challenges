@@ -1,16 +1,15 @@
 require 'rest-client'
 require 'json'
 
-class EbiDbfetchApi
+class TogoRestApi
   attr_reader :url
 
   def initialize()
-    @url = "http://www.ebi.ac.uk/Tools/dbfetch/"
+    @url = "http://togows.dbcls.jp/"
   end
 
   def get(db, format, id, style)
     final_url = generate_dbfetch_url(db, format, id, style)
-    puts final_url
     response = RestClient.get(final_url)
     check_response(response)
     puts response
@@ -19,24 +18,24 @@ class EbiDbfetchApi
   end
 
   private
-
-  def generate_dbfetch_url(db = NIL, format = NIL, id = NIL, style = NIL)
-    dbfetch_url = 'dbfetch?'
+#TODO FINISH TOGO URL
+  def generate_dbfetch_url(db = NIL, ids = NIL,  field = NIL, format = NIL)
+    dbfetch_url = 'entry/'
     query_params = []
     if db
-      query_params.append("db=#{db}")
+      query_params.append("#{db}/")
     end
-    if format
-      query_params.append("format=#{format}")
+    if ids
+      query_params.append("#{ids}/")
     end
-    if id
-      query_params.append("id=#{id}")
+    if field
+      query_params.append("#{field}")
     end
     if style
-      query_params.append("style=#{style}")
+      query_params.append(".#{format}")
     end
     if query_params.length > 0
-      @url + dbfetch_url + query_params.join("&")
+      @url + dbfetch_url + query_params.join()
     else
       raise('Missing params for EBI DBFetch Database')
     end
