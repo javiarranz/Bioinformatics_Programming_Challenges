@@ -2,6 +2,7 @@ class Gene
 
   attr_accessor :gene_id
   attr_accessor :gene_name
+  attr_accessor :protein_id # TODO Delete to add a class proteing
   attr_accessor :mutant_phenotype
   attr_accessor :linked_genes
   attr_accessor :go_list

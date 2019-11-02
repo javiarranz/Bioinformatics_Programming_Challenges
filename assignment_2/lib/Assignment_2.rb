@@ -56,16 +56,20 @@ class Assignment2
 
     # Psicquiq
     genes_list.each do |gene|
-      psicquic_fetch = @psicquic_api.get(gene.gene_id, 'xml25')
-      if psicquic_fetch
+      psicquic_entry = @psicquic_api.get(gene.gene_id, 'xml25')
+      if psicquic_entry
         puts "Encontrado para #{gene.gene_id}"
+        get_interactors(psicquic_entry, gene)
+        protein = @gene_database.get_protein_by_gene(gene)
+        get_interactions(psicquic_entry, protein.protein_id)
+
+
+        puts "Fin Gen"
       else
         puts "No Encontrado para #{gene.gene_id}"
       end
     end
 
-    # Pasar el XML a JSON para trabajar mas facilmente
-    # ir debugueando el json para sacar los datos necesarios.
     # Recorrer cada entry.
     # Recorrer cada interactorList para conocer los interactors
     #     Identificar el shortLabel (Q56YA5) basandonos en el locus name (At2g13360)
@@ -85,29 +89,69 @@ class Assignment2
 
   end
 
+  private
 
-  def exercise_2()
-
-    puts %(\n\n** Exercise 2 **
-
--------------------------------------------------------------------------------------------------------------------------------------\n\n)
-
+  def get_interactors(psicquic_entry, gene)
+    psicquic_entry['interactorList']['interactor'].each do |interactor|
+      if interactor['organism']['names']['shortLabel'] == 'arath'
+        protein_id = interactor['names']['shortLabel']
+        interactor['names']['alias'].each do |name|
+          if name.upcase =~ /AT\dG\d{5}/
+            gene_id = name.upcase
+            if gene_id == gene.gene_id
+              @gene_database.add_protein(protein_id, gene)
+              # TODO Add Go
+            else
+              gene_new = @gene_database.add_gene(gene_id)
+              @gene_database.add_protein(protein_id, gene_new)
+            end
+          end
+        end
+      end
+    end
   end
 
-  def bonus_1()
-    puts %(\n\n** Bonus 1 **
+  def get_interactions(psicquic_entry, protein_id)
+    # interactions = []
+    psicquic_entry['interactionList']['interaction'].each do |interaction|
+      # TODO esto esta fallando con AT4G05180
+      if !["MI:0018", "MI:0397"].include? interaction["xref"]["primaryRef"]["refTypeAc"]
+        # Remove interactions detected by "two hybrib" and "two hybrid array" (too many false positives)
+        proteins = interaction['names']['shortLabel'].split('-')
+        #Always insert in same order ()
+        protein_name_1 = protein_id
+        protein_name_2 = proteins[0] == protein_id ? proteins[1] : proteins[0]
 
--------------------------------------------------------------------------------------------------------------------------------------\n\n)
-    puts "\t----- SOLUTION -----"
-
-  end
-
-  def bonus_2()
-    puts "\n\n** Bonus 2 **
-
--------------------------------------------------------------------------------------------------------------------------------------\n\n"
-    puts "\t----- SOLUTION -----"
-
+        if protein_name_1 != protein_name_2 # If both names are different means that is not the same protein
+          conf_type = "unknown"
+          conf_value = 0.0
+          begin
+            conf_value = interaction['confidenceList']['confidence']['value'].to_f
+          rescue
+            interaction['confidenceList']['confidence'].each do |conf|
+              if conf['value'] =~ /\d\.\d+/
+                conf_value = conf['value'].to_f
+              else
+                conf_type = conf['value']
+              end
+            end
+          end
+          if conf_value > 0.1
+            # Confidence value to only return valuable information
+            # interactions.push({
+            #                       "interactor_1": protein_name_1,
+            #                       "interactor_2": protein_name_2,
+            #                       "confidence": confidence
+            #                   })
+            #
+            # #TODO Insert into Database
+            protein_1 = @gene_database.get_protein(protein_name_1)
+            protein_2 = @gene_database.get_protein(protein_name_2)
+            @gene_database.add_ppi(protein_1, protein_2, conf_type, conf_value)
+          end
+        end
+      end
+    end
   end
 end
 

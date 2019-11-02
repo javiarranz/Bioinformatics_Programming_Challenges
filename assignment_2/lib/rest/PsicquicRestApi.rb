@@ -1,8 +1,6 @@
 require 'rest-client'
 require 'json'
 require 'active_support/core_ext/hash'
-s = Net::HTTP.get_response(URI.parse('https://stackoverflow.com/feeds/tag/ruby/')).body
-puts Hash.from_xml(s).to_json
 
 class PsicquicRestApi
   attr_reader :url
@@ -17,10 +15,7 @@ class PsicquicRestApi
     begin
       response = RestClient.get(final_url)
       check_response(response)
-      puts response
-      if response.body != ""
-        body = response.body
-      end
+      body = parse_format(format, response.body)
     rescue RestClient::ExceptionWithResponse => e
       $stderr.puts e.response
         # now we are returning 'False', and we will check that with an \"if\" statement in our main code
@@ -35,6 +30,22 @@ class PsicquicRestApi
   end
 
   private
+
+  def parse_format(format, content)
+    parsed_content = false
+    case format
+    when 'xml25'
+      data = Hash.from_xml(content)
+      if data['entrySet']['entry']
+        parsed_content = data['entrySet']['entry']
+      end
+    when 'tab25'
+      if content != ""
+        parsed_content = content
+      end
+    end
+    parsed_content
+  end
 
   def generate_url(version = 'current', id = NIL)
     fetch_url = "#{@url}/#{version}/search/query/"
