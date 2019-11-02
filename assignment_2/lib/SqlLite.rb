@@ -12,7 +12,8 @@ class SqlLite
     begin
       @db.execute query
     rescue SQLite3::Exception => e
-      puts "Cannot execute query #{query} ===> #{e}"
+      #puts "Cannot execute query #{query} ===> #{e}"
+      raise e
     end
   end
 end

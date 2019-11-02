@@ -4,12 +4,11 @@ class Gene
   attr_accessor :gene_name
   attr_accessor :mutant_phenotype
   attr_accessor :linked_genes
-  attr_accessor :ebi_dbfetch
-  attr_accessor :togo_dbfetch
-
+  attr_accessor :go_list
 
   def initialize(gene_id = "AT0G00000", gene_name = "", mutant_phenotype = "")
     @linked_genes = []
+    @go_list = []
     gene_id = gene_id.upcase
     gene_id = gene_id.gsub("\n", '')
     gene_name = gene_name.gsub("\n", '')
@@ -18,7 +17,7 @@ class Gene
     if gene_id =~ /AT\dG\d{5}/
       @gene_id = gene_id
     else
-      abort("The gene ID should have the right format (ATxGxxxxx), where x is a number")
+      abort("The gene ID should have the right format (ATxGxxxxx), where x is AT2G13360.txt number")
     end
     if gene_name != ""
       @gene_name = gene_name
@@ -54,5 +53,8 @@ class Gene
     puts message
   end
 
+  def add_go(go)
+    go_list.append(go)
+  end
 
 end
