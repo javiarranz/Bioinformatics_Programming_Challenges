@@ -26,5 +26,20 @@ class InteractionNetwork
   #
   # end
   #
-  def
+#
+  # decidir como se monta la network
+  # select (te traes todos los genes)
+  # vas uno a uno, gen a gen
+  # crear todas las redes de 1 nivel posibles
+  # funcion recursiva (que se llama a si misma)
+  #
+  #
+  #
+  # creamos una lista
+  # tengo una funcion que me trae todos los genes
+  # la llamas (lista con todos)
+  # los iteras
+  # para cada uno de esos, haces otra funcion que coja el ID y llamme a base de datos (slect) que te traiga el propio gen
+  # y que te traiga sus interacciones
+  # para cada interaccion llamas a base de datos para que te traiga ese gen, y sus interacciones
 end

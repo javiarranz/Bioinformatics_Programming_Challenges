@@ -187,6 +187,18 @@ class GeneDatabase
     get_single_protein_by_gen(gene)
   end
 
+  def get_ppi(protein_id)
+    query = "SELECT * FROM #{@interactionsTable} WHERE protein_id_1 = '#{protein_id}'"
+    protein_list = []
+    db_protein_list = @sqllite.execute(query)
+    if db_protein_list.length > 0
+      db_protein_list.each do |ppi|
+        protein_list.push(get_single_protein(ppi[1]))
+      end
+    end
+    protein_list
+  end
+
   def link_gene(gene_id_1, gene_id_2)
     # TODO get from Database and create the Gene
     query = "INSERT INTO #{@geneTable} VALUES ('#{gene_id_1}','#{gene_id_2}')"
