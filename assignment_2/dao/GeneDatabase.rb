@@ -18,7 +18,7 @@ class GeneDatabase
     clean_tables(true, true, true)
   end
 
-  def clean_tables(geneTable = true, linked_table = true, protein_table = true)
+  def clean_tables(geneTable = true, linked_table = true, protein_table = true, interactions_table = true)
 
     if geneTable
       delete_table(@geneTable)
@@ -29,6 +29,10 @@ class GeneDatabase
     if linked_table
       delete_table(@geneLinkedTable)
     end
+    if interactions_table
+      delete_table(@interactionsTable)
+    end
+
     puts 'Cleaned Tables'
   end
 
@@ -105,6 +109,7 @@ class GeneDatabase
   def get_protein(protein_id)
     get_single_protein(protein_id)
   end
+
   def get_protein_by_gene(gene)
     get_single_protein_by_gen(gene)
   end
@@ -141,6 +146,7 @@ class GeneDatabase
     gene = get_single_gen(gene_id)
     Protein.new(protein_id, gene)
   end
+
   def get_single_protein_by_gen(gene)
     query = "SELECT * FROM #{@proteinTable} WHERE gene_id = '#{gene.gene_id}'"
 

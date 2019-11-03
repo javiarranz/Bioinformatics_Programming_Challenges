@@ -22,7 +22,7 @@ class Assignment2
     @psicquic_api = PsicquicRestApi.new
     @gene_database = GeneDatabase.new
 
-    # @gene_database.clean_tables()
+    @gene_database.clean_tables()
 
     path_fixtures = './assignment_2/fixtures'
     @arabidopsis_genelist = FileParser.new(path_fixtures, 'test_ArabidopsisSubNetwork_GeneList.tsv')
@@ -42,7 +42,6 @@ class Assignment2
 -------------------------------------------------------------------------------------------------------------------------------------\n\n)
 
     genes_list = @gene_database.get_all_genes_without_linked()
-    #
     # # EBI API
     # genes_list.each do |gene|
     #   ebifetch = @ebi_api.get("ensemblgenomesgene", "embl", gene.gene_id, "raw")
@@ -58,15 +57,15 @@ class Assignment2
     genes_list.each do |gene|
       psicquic_entry = @psicquic_api.get(gene.gene_id, 'xml25')
       if psicquic_entry
-        puts "Encontrado para #{gene.gene_id}"
+        puts "Encontrado para #{gene.gene_id} in psicquic database"
         get_interactors(psicquic_entry, gene)
         protein = @gene_database.get_protein_by_gene(gene)
         get_interactions(psicquic_entry, protein.protein_id)
-
-
         puts "Fin Gen"
       else
         puts "No Encontrado para #{gene.gene_id}"
+      end
+
       end
     end
 
@@ -87,9 +86,14 @@ class Assignment2
     #gene.togo_dbfetch = togofetch
     #end
 
-  end
+
 
   private
+
+  def get_annotations(kegg, go)
+
+
+  end
 
   def get_interactors(psicquic_entry, gene)
     psicquic_entry['interactorList']['interactor'].each do |interactor|
@@ -101,6 +105,25 @@ class Assignment2
             if gene_id == gene.gene_id
               @gene_database.add_protein(protein_id, gene)
               # TODO Add Go
+              # togows_entry_kegg = @togo_api.get("kegg-genes","ath:#{gene.gene_id}","pathways","json")
+              # if togows_entry_kegg
+              #   puts "Encontrado para #{gene.gene_id} in togows database"
+              #   if togows_entry_kegg[0]
+              #
+              #   end
+              #   puts "Fin Gen"
+              # else
+              #   puts "No Encontrado para #{gene.gene_id} in togows database"
+              # end
+              # togows_entry_go = @togo_api.get("ebi-uniprot","#{gene.gene_id}","dr","json")
+              # if togows_entry_go
+              #   puts "Encontrado para #{gene.gene_id} in togows database"
+              #   if dataGO[0]["GO"]
+              #   puts "Fin Gen"
+              # else
+              #   puts "No Encontrado para #{gene.gene_id} in togows database"
+              # end
+
             else
               gene_new = @gene_database.add_gene(gene_id)
               @gene_database.add_protein(protein_id, gene_new)
@@ -115,7 +138,8 @@ class Assignment2
     # interactions = []
     psicquic_entry['interactionList']['interaction'].each do |interaction|
       # TODO esto esta fallando con AT4G05180
-      if !["MI:0018", "MI:0397"].include? interaction["xref"]["primaryRef"]["refTypeAc"]
+      exceptions = ["MI:0018", "MI:0397"]
+      if !exceptions.include? interaction["xref"]["primaryRef"]["refTypeAc"]
         # Remove interactions detected by "two hybrib" and "two hybrid array" (too many false positives)
         proteins = interaction['names']['shortLabel'].split('-')
         #Always insert in same order ()
@@ -153,5 +177,9 @@ class Assignment2
       end
     end
   end
+
+  # def get go_annotations(togows_entry, gene)
+  #
+  # end
 end
 
