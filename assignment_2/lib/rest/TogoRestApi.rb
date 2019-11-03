@@ -15,7 +15,6 @@ class TogoRestApi
     begin
       response = RestClient.get(final_url)
       check_response(response)
-      puts response
       body = response.body
     rescue RestClient::ExceptionWithResponse => e
       $stderr.puts e.response

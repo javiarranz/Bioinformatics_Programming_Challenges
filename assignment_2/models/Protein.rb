@@ -17,7 +17,7 @@ class Protein
       @protein_id = protein_id
     else
       # TODO Change format
-      abort("The protein ID should have the right format (ATxGxxxxx), where x is a number")
+      raise("The protein ID should have the right format (/[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/), where x is a number")
     end
   end
 

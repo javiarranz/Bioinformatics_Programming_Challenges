@@ -2,10 +2,11 @@ class Gene
 
   attr_accessor :gene_id
   attr_accessor :gene_name
-  attr_accessor :protein_id # TODO Delete to add a class proteing
+  attr_accessor :protein
   attr_accessor :mutant_phenotype
   attr_accessor :linked_genes
   attr_accessor :go_list
+  attr_accessor :kegg_list
 
   def initialize(gene_id = "AT0G00000", gene_name = "", mutant_phenotype = "")
     @linked_genes = []
@@ -15,10 +16,10 @@ class Gene
     gene_name = gene_name.gsub("\n", '')
     mutant_phenotype = mutant_phenotype.gsub("\n", '')
 
-    if gene_id =~ /AT\dG\d{5}/
+    if gene_id =~ /^AT\dG\d{5}$/
       @gene_id = gene_id
     else
-      abort("The gene ID should have the right format (ATxGxxxxx), where x is AT2G13360.txt number")
+      abort("The gene ID should have the right format (ATxGxxxxx), where x is a number. Value provided: #{gene_id}")
     end
     if gene_name != ""
       @gene_name = gene_name
