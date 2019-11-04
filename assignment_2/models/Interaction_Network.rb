@@ -4,11 +4,11 @@ class InteractionNetwork
   attr_accessor :num_nodes # Number of nodes that the networks has
   attr_accessor :members # Array containing the Gene objects from the given file that belong to the network
 
-  def initialize (params = {})
+  def initialize (network_id = "X", num_nodes = 0, members = Hash.new )
 
-    @network_id = params.fetch(:network_id, "X")
-    @num_nodes = params.fetch(:num_nodes, "0")
-    @members = params.fetch(:members, Hash.new)
+    @network_id = network_id
+    @num_nodes = num_nodes
+    @members = members
   end
 
   #TODO this functions

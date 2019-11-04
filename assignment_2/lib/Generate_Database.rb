@@ -87,18 +87,7 @@ class Generate_database
     end
   end
 
-# Recorrer cada entry.
-# Recorrer cada interactorList para conocer los interactors
-#     Identificar el shortLabel (Q56YA5) basandonos en el locus name (At2g13360)
-#     poner siempre el que coincida con gene_id como primero.
-#     confidenceList tiene el nivel de confianza
-#     Cada interactor tiene sus Go
-# check organism - name -shortlabel = arath
-#
-# En interactionList, interaction, names, shortlabel sale un string con amnos interactors
-#
-#
-
+  #------------------------------------------------------------------------------------------------------------>
 
   private
 
@@ -156,18 +145,22 @@ class Generate_database
       # Here I check that the organism is arath (could also be done with the taxid)
       if interactor['organism']['names']['shortLabel'] == 'arath'
         protein_id = interactor['names']['shortLabel']
-        # Here I
-        interactor['names']['alias'].each do |name|
-          if name.upcase =~ /AT\dG\d{5}/
-            gene_id = name.upcase
-            if gene_id == gene.gene_id
-              @gene_database.add_protein(protein_id, gene)
-            else
-              gene_new = create_gene(gene_id)
-              if gene_new
-                @gene_database.add_protein(protein_id, gene_new)
+        # Here I look for the gene_id that is in this web (names, alias ==> AT\dG\{5})
+        # In case it finds the gene (and saves it into the variable gene_id), I check if that gene
+        # corresponds to the gene id it was searching. It true, it will add the protein
+        protein_alias = interactor['names']['alias']
+        if protein_alias && protein_alias.respond_to?('each')
+          protein_alias.each do |name|
+            if name.upcase =~ /AT\dG\d{5}/
+              gene_id = name.upcase
+              if gene_id == gene.gene_id
+                @gene_database.add_protein(protein_id, gene)
+              else
+                gene_new = create_gene(gene_id)
+                if gene_new
+                  @gene_database.add_protein(protein_id, gene_new)
+                end
               end
-
             end
           end
         end
