@@ -38,8 +38,9 @@ class Generate_database
     #@arabidopsis_genelist = FileParser.new(path_fixtures, 'test_ArabidopsisSubNetwork_GeneList.tsv')
     @arabidopsis_genelist = FileParser.new(path_fixtures, 'ArabidopsisSubNetwork_GeneList.tsv')
     gene_rows = @arabidopsis_genelist.rows
-    gene_rows_list = []
 
+    # I create a list containing all locus gene
+    gene_rows_list = []
     gene_rows.each do |row|
       gene_id = row["Gene_ID"]
       gene_rows_list.append(gene_id)
@@ -50,15 +51,9 @@ class Generate_database
     puts "*** This might be a long process. Be patient"
 
     gene_rows.each do |row|
-      gene_id = row["Gene_ID"]
-      gene_rows_list.each do |include|
-        if include.include? gene_id
-          create_gene(gene_id)
-
-
-        end
-      end
+      create_gene(row['Gene_ID'])
     end
+
 
     # EBI API ==> (not used)
 
@@ -89,56 +84,39 @@ class Generate_database
       else
         #puts "*** Interactions not found for  Gene #{gene.gene_id}"
       end
-
     end
   end
 
-  # Recorrer cada entry.
-  # Recorrer cada interactorList para conocer los interactors
-  #     Identificar el shortLabel (Q56YA5) basandonos en el locus name (At2g13360)
-  #     poner siempre el que coincida con gene_id como primero.
-  #     confidenceList tiene el nivel de confianza
-  #     Cada interactor tiene sus Go
-  # check organism - name -shortlabel = arath
-  #
-  # En interactionList, interaction, names, shortlabel sale un string con amnos interactors
-  #
-  #
+# Recorrer cada entry.
+# Recorrer cada interactorList para conocer los interactors
+#     Identificar el shortLabel (Q56YA5) basandonos en el locus name (At2g13360)
+#     poner siempre el que coincida con gene_id como primero.
+#     confidenceList tiene el nivel de confianza
+#     Cada interactor tiene sus Go
+# check organism - name -shortlabel = arath
+#
+# En interactionList, interaction, names, shortlabel sale un string con amnos interactors
+#
+#
 
 
   private
 
   def create_gene(gene_id, protein_name = false)
-    gene_rows = @arabidopsis_genelist.rows
-    gene_rows_list = []
-    gene_rows.each do |row|
-      gene_id = row["Gene_ID"]
-      gene_rows_list.append(gene_id)
-    end
-    gene_rows.each do |row|
-      gene_id = row["Gene_ID"]
-      gene_id = gene_id.gsub("\n", '')
-      gene_rows_list.each do |include|
-        if include.include? gene_id
-          gene = @gene_database.add_gene(gene_id)
-
-          if gene
-            if protein_name
-              @gene_database.add_protein(protein_name, gene)
-            end
-            create_annotations(gene, protein_name)
-            return gene
-          end
-        end
+    gene = @gene_database.add_gene(gene_id)
+    if gene
+      if protein_name
+        @gene_database.add_protein(protein_name, gene)
       end
+      create_annotations(gene, protein_name)
+      return gene
     end
     false
-
   end
 
   def create_annotations(gene, protein_name)
 
-    #puts "*** Introducing annotations for #{gene.gene_id}..."
+    puts "*** Introducing the gene #{gene.gene_id} and its annotations..."
     togows_entry_kegg = @togo_api.get("kegg-genes", "ath:#{gene.gene_id}", "pathways", "json")
     togows_entry_kegg = JSON.parse(togows_entry_kegg)
     if togows_entry_kegg && togows_entry_kegg.length > 0
@@ -177,35 +155,19 @@ class Generate_database
     psicquic_entry['interactorList']['interactor'].each do |interactor|
       # Here I check that the organism is arath (could also be done with the taxid)
       if interactor['organism']['names']['shortLabel'] == 'arath'
-        # Here I obtain the protein ID and I save it into a variable
         protein_id = interactor['names']['shortLabel']
-        protein_alias = interactor['names']['alias']
-        # Here I look for the gene_id that is in this web (names, alias ==> AT\dG\{5})
-        # In case it finds the gene (and saves it into the variable gene_id), I check if that gene
-        # corresponds to the gene id it was searching. It true, it will add the protein
-        if protein_alias && protein_alias.length > 1
-          protein_alias.each do |name|
-            if name.upcase =~ /AT\dG\d{5}/
-              gene_id = name.upcase
-              if gene_id == gene.gene_id
-                @gene_database.add_protein(protein_id, gene)
-
-                #If not, it will create a new gen
-              else
-                gene_new = create_gene(gene_id)
-                if gene_new
-                  @gene_database.add_protein(protein_id, gene_new)
-                end
-              end
-            end
-          end
-        else
-          if protein_alias.upcase =~ /AT\dG\d{5}/
+        # Here I
+        interactor['names']['alias'].each do |name|
+          if name.upcase =~ /AT\dG\d{5}/
             gene_id = name.upcase
             if gene_id == gene.gene_id
               @gene_database.add_protein(protein_id, gene)
             else
-              puts "alias not found"
+              gene_new = create_gene(gene_id)
+              if gene_new
+                @gene_database.add_protein(protein_id, gene_new)
+              end
+
             end
           end
         end
@@ -239,7 +201,6 @@ class Generate_database
         begin
           conf_value = interaction['confidenceList']['confidence']['value'].to_f
         rescue
-          # Here we get the confidence value and type and save it into variables (conf_value, conf_type)
           interaction['confidenceList']['confidence'].each do |conf|
             if conf['value'] =~ /\d\.\d+/
               conf_value = conf['value'].to_f
@@ -250,7 +211,7 @@ class Generate_database
         end
         if conf_value > 0.1
           # Confidence value to only return valuable information (value must be modified)
-          # Most of them hade between 0.3 and 0.5
+
 
           # If protein_1 exists, tell me it's name
           protein_1 = @gene_database.get_protein(protein_name_1)

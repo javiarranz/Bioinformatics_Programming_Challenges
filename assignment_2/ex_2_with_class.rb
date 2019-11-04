@@ -18,8 +18,8 @@ puts "Read comments"
 
 
 # START WITH TRUE THE FIRST TIME TO CREATE DATABASE, THEN CHANGE IT TO FALSE AND USE THE DATABASE
-#  assignment_2 = Generate_database.new(true)
-assignment_2 = Generate_database.new(false)
+assignment_2 = Generate_database.new(true)
+#assignment_2 = Generate_database.new(false)
 
 assignment_2.create_database()
 

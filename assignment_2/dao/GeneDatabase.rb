@@ -78,7 +78,7 @@ class GeneDatabase
         query = "INSERT INTO #{@proteinTable} VALUES ('#{clean_value(protein.protein_id)}','#{clean_value(gene.gene_id)}')"
         @sqllite.execute(query)
       rescue Exception => e
-        puts e
+        #puts e
         return false
       end
     end
