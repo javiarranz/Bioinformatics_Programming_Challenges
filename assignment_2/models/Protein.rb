@@ -16,8 +16,8 @@ class Protein
     if protein_id =~ /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/
       @protein_id = protein_id
     else
-      # TODO Change format
-      raise("The protein ID should have the right format (/[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/), where x is a number")
+      raise("...")
+      #raise("The protein ID should have the right format (/[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/)")
     end
   end
 

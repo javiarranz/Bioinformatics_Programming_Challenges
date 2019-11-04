@@ -11,6 +11,7 @@ class Gene
   def initialize(gene_id = "AT0G00000", gene_name = "", mutant_phenotype = "")
     @linked_genes = []
     @go_list = []
+    @kegg_list = []
     gene_id = gene_id.upcase
     gene_id = gene_id.gsub("\n", '')
     gene_name = gene_name.gsub("\n", '')
@@ -19,7 +20,7 @@ class Gene
     if gene_id =~ /^AT\dG\d{5}$/
       @gene_id = gene_id
     else
-      abort("The gene ID should have the right format (ATxGxxxxx), where x is a number. Value provided: #{gene_id}")
+      raise("The gene ID should have the right format (ATxGxxxxx), where x is a number. Value provided: #{gene_id}")
     end
     if gene_name != ""
       @gene_name = gene_name
@@ -57,6 +58,10 @@ class Gene
 
   def add_go(go)
     go_list.append(go)
+  end
+
+  def add_kegg(kegg)
+    kegg_list.append(kegg)
   end
 
 end

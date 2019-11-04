@@ -7,7 +7,7 @@ require './assignment_2/dao/GeneDatabase'
 require './assignment_2/models/Gene'
 
 
-class Assignment2
+class Generate_database
   attr_reader :ebi_api
   attr_reader :togo_api
   attr_reader :psicquic_api
@@ -22,28 +22,46 @@ class Assignment2
     @psicquic_api = PsicquicRestApi.new
     @gene_database = GeneDatabase.new
 
-
-
-
     if clean
       puts 'Cleaning Database...'
       @gene_database.clean_tables
     end
   end
+
   def create_database()
-    puts %(\n\n** Introducing data into the database
+    puts %(\n\n** Introducing data into the database..
 -------------------------------------------------------------------------------------------------------------------------------------\n\n)
+
+    # Here I start reading the file with the genes (was txt, but I transformed it into tsv)
+
     path_fixtures = './assignment_2/fixtures'
-    # @arabidopsis_genelist = FileParser.new(path_fixtures, 'test_ArabidopsisSubNetwork_GeneList.tsv')
+    #@arabidopsis_genelist = FileParser.new(path_fixtures, 'test_ArabidopsisSubNetwork_GeneList.tsv')
     @arabidopsis_genelist = FileParser.new(path_fixtures, 'ArabidopsisSubNetwork_GeneList.tsv')
     gene_rows = @arabidopsis_genelist.rows
+    gene_rows_list = []
 
-    gene_rows.each do |row|
-      create_gene(row['Gene_ID'])
-    end
+    # gene_rows.each do |row|
+    #   gene_id = row["Gene_ID"]
+    #   gene_rows_list.append(gene_id)
+    # end
+    #
+    # # Then I create the genes in the gene table using the function create gen and I keep all the genes in a list
+    # puts "*** Introducing genes into database..."
+    # puts "*** This might be a long process. Be patient"
+    #
+    # gene_rows.each do |row|
+    #   gene_id = row["Gene_ID"]
+    #   gene_rows_list.each do |include|
+    #     if include.include? gene_id
+    #       create_gene(gene_id)
+    #
+    #
+    #     end
+    #   end
+    # end
 
-    genes_list = @gene_database.get_all_genes_without_linked()
-    # # EBI API
+    # EBI API ==> (not used)
+
     # genes_list.each do |gene|
     #   ebifetch = @ebi_api.get("ensemblgenomesgene", "embl", gene.gene_id, "raw")
     #
@@ -53,19 +71,23 @@ class Assignment2
     #     puts "No Encontrado para #{gene.gene_id}"
     #   end
     # end
+    #
 
-    # Psicquiq
+    genes_list = @gene_database.get_all_genes_without_linked()
+
+    # Psicquiq ==> I search for the information I need in the web that gives me the interactions
+
     genes_list.each do |gene|
       psicquic_entry = @psicquic_api.get(gene.gene_id, 'xml25')
       if psicquic_entry
-        puts "*** START with Gene #{gene.gene_id}"
-        puts "\t*** Introducing interactors for #{gene.gene_id}..."
+        puts "*** Adding interactions for Gene #{gene.gene_id}"
+        #puts "\t*** Introducing interactors for #{gene.gene_id}..."
         get_interactors(psicquic_entry, gene)
         protein = @gene_database.get_protein_by_gene(gene)
-        puts "\t*** Introducing interactions for #{gene.gene_id}..."
+        #puts "\t*** Introducing interactions for #{gene.gene_id}..."
         get_interactions(psicquic_entry, protein.protein_id)
       else
-        puts "*** Interactions not found for  Gene #{gene.gene_id}"
+        #puts "*** Interactions not found for  Gene #{gene.gene_id}"
       end
 
     end
@@ -84,28 +106,39 @@ class Assignment2
   #
 
 
-  #togofetch = @togo_api("kegg-genes", gene.gene_id)
-  #gene.togo_dbfetch = togofetch
-  #end
-
-
   private
 
   def create_gene(gene_id, protein_name = false)
-    gene = @gene_database.add_gene(gene_id)
-    if gene
-      if protein_name
-        @gene_database.add_protein(protein_name, gene)
+    gene_rows = @arabidopsis_genelist.rows
+    gene_rows_list = []
+    gene_rows.each do |row|
+      gene_id = row["Gene_ID"]
+      gene_rows_list.append(gene_id)
+    end
+    gene_rows.each do |row|
+      gene_id = row["Gene_ID"]
+      gene_id = gene_id.gsub("\n", '')
+      gene_rows_list.each do |include|
+        if include.include? gene_id
+          gene = @gene_database.add_gene(gene_id)
+
+          if gene
+            if protein_name
+              @gene_database.add_protein(protein_name, gene)
+            end
+            create_annotations(gene, protein_name)
+            return gene
+          end
+        end
       end
-      create_annotations(gene, protein_name)
-      return gene
     end
     false
+
   end
 
   def create_annotations(gene, protein_name)
 
-    puts "*** Introducing annotations for #{gene.gene_id}..."
+    #puts "*** Introducing annotations for #{gene.gene_id}..."
     togows_entry_kegg = @togo_api.get("kegg-genes", "ath:#{gene.gene_id}", "pathways", "json")
     togows_entry_kegg = JSON.parse(togows_entry_kegg)
     if togows_entry_kegg && togows_entry_kegg.length > 0
@@ -114,7 +147,7 @@ class Assignment2
         @gene_database.add_kegg(gene, kegg_id, kegg_description)
       end
     else
-      puts "    - Not found in togows kegg-genes database"
+      puts "    - Not found #{gene.gene_id} in togows kegg-genes database"
     end
     togows_entry_go = @togo_api.get("ebi-uniprot", "#{gene.gene_id}", "dr", "json")
     togows_entry_go = JSON.parse(togows_entry_go)
@@ -140,20 +173,23 @@ class Assignment2
   end
 
   def get_interactors(psicquic_entry, gene)
+    # Here I look for the list of interactors
     psicquic_entry['interactorList']['interactor'].each do |interactor|
+      # Here I check that the organism is arath (could also be done with the taxid)
       if interactor['organism']['names']['shortLabel'] == 'arath'
         protein_id = interactor['names']['shortLabel']
+        # Here I
         interactor['names']['alias'].each do |name|
           if name.upcase =~ /AT\dG\d{5}/
             gene_id = name.upcase
             if gene_id == gene.gene_id
               @gene_database.add_protein(protein_id, gene)
-
             else
               gene_new = create_gene(gene_id)
-              if gene_new
-                @gene_database.add_protein(protein_id, gene_new)
-              end
+                if gene_new
+                  @gene_database.add_protein(protein_id, gene_new)
+                end
+
             end
           end
         end
@@ -176,7 +212,8 @@ class Assignment2
     if !exceptions.include? interaction["xref"]["primaryRef"]["refTypeAc"]
       # Remove interactions detected by "two hybrib" and "two hybrid array" (too many false positives)
       proteins = interaction['names']['shortLabel'].split('-')
-      #Always insert in same order ()
+      # Always insert in same order ()
+      # Protein_1 is the parameter and protein_2 is the other one, no matter the order
       protein_name_1 = protein_id
       protein_name_2 = proteins[0] == protein_id ? proteins[1] : proteins[0]
 
@@ -195,25 +232,26 @@ class Assignment2
           end
         end
         if conf_value > 0.1
-          # Confidence value to only return valuable information
-          # interactions.push({
-          #                       "interactor_1": protein_name_1,
-          #                       "interactor_2": protein_name_2,
-          #                       "confidence": confidence
-          #                   })
-          #
+          # Confidence value to only return valuable information (value must be modified)
+
+
+          # If protein_1 exists, tell me it's name
           protein_1 = @gene_database.get_protein(protein_name_1)
+          # If protein_1 does not exist, go to Togows and look for the name
           if !protein_1
             protein_1 = get_protein(protein_name_1)
           end
+
+          # If protein_2 exists, tell me it's name
           protein_2 = @gene_database.get_protein(protein_name_2)
           if !protein_2
             protein_2 = get_protein(protein_name_2)
           end
+          # If protein_2 does not exist, go to Togows and look for the name
           if protein_1 && protein_2
             @gene_database.add_ppi(protein_1, protein_2, conf_type, conf_value)
-          else
-            puts "Cannot insert PPI for #{protein_name_1} and #{protein_name_2}"
+          # else
+          #   puts "Cannot insert PPI for #{protein_name_1} and #{protein_name_2}"
             if !protein_1
               puts "- #{protein_name_1} not found"
             end
@@ -226,10 +264,6 @@ class Assignment2
     end
   end
 
-  # def get go_annotations(togows_entry, gene)
-  #
-  # end
-  #
   def get_protein(protein_name)
     protein = false
     togows_gene_db = @togo_api.get("ebi-uniprot", "#{protein_name}", "gn", "json")

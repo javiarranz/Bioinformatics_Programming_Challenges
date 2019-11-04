@@ -2,6 +2,8 @@ require './assignment_2/lib/SqlLite'
 require './assignment_2/models/Gene'
 require './assignment_2/models/Protein'
 
+# This class contains all the functions that our database can do (add, get_single, get_all, delete..)
+
 
 class GeneDatabase
 
@@ -55,12 +57,12 @@ class GeneDatabase
     if !gene
       begin
         gene = Gene.new(gene_id, gene_name, mutant_phenotype) #Create Gene class to validate the input data
-        # Inserta en base de datos
+        # Insert in database
         query = "INSERT INTO #{@geneTable} VALUES ('#{clean_value(gene.gene_id)}','#{clean_value(gene.gene_name)}','#{clean_value(gene.mutant_phenotype)}')"
         q = @sqllite.execute(query)
         return gene
       rescue Exception => e
-        puts "Cannot insert #{gene_id} because it is not in compliant with the Gene rules. #{e}"
+        #puts "Cannot insert #{gene_id} because it is not in compliant with the Gene rules. #{e}"
       end
       return false
     end
@@ -72,7 +74,7 @@ class GeneDatabase
     if !protein
       begin
         protein = Protein.new(protein_id, gene)
-        # Inserta en base de datos
+        # Insert into database
         query = "INSERT INTO #{@proteinTable} VALUES ('#{clean_value(protein.protein_id)}','#{clean_value(gene.gene_id)}')"
         @sqllite.execute(query)
       rescue Exception => e
@@ -200,7 +202,6 @@ class GeneDatabase
   end
 
   def link_gene(gene_id_1, gene_id_2)
-    # TODO get from Database and create the Gene
     query = "INSERT INTO #{@geneTable} VALUES ('#{gene_id_1}','#{gene_id_2}')"
     @sqllite.execute(query)
   end
