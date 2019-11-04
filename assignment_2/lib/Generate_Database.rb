@@ -40,25 +40,25 @@ class Generate_database
     gene_rows = @arabidopsis_genelist.rows
     gene_rows_list = []
 
-    # gene_rows.each do |row|
-    #   gene_id = row["Gene_ID"]
-    #   gene_rows_list.append(gene_id)
-    # end
-    #
-    # # Then I create the genes in the gene table using the function create gen and I keep all the genes in a list
-    # puts "*** Introducing genes into database..."
-    # puts "*** This might be a long process. Be patient"
-    #
-    # gene_rows.each do |row|
-    #   gene_id = row["Gene_ID"]
-    #   gene_rows_list.each do |include|
-    #     if include.include? gene_id
-    #       create_gene(gene_id)
-    #
-    #
-    #     end
-    #   end
-    # end
+    gene_rows.each do |row|
+      gene_id = row["Gene_ID"]
+      gene_rows_list.append(gene_id)
+    end
+
+    # Then I create the genes in the gene table using the function create gen and I keep all the genes in a list
+    puts "*** Introducing genes into database..."
+    puts "*** This might be a long process. Be patient"
+
+    gene_rows.each do |row|
+      gene_id = row["Gene_ID"]
+      gene_rows_list.each do |include|
+        if include.include? gene_id
+          create_gene(gene_id)
+
+
+        end
+      end
+    end
 
     # EBI API ==> (not used)
 
@@ -177,19 +177,35 @@ class Generate_database
     psicquic_entry['interactorList']['interactor'].each do |interactor|
       # Here I check that the organism is arath (could also be done with the taxid)
       if interactor['organism']['names']['shortLabel'] == 'arath'
+        # Here I obtain the protein ID and I save it into a variable
         protein_id = interactor['names']['shortLabel']
-        # Here I
-        interactor['names']['alias'].each do |name|
-          if name.upcase =~ /AT\dG\d{5}/
+        protein_alias = interactor['names']['alias']
+        # Here I look for the gene_id that is in this web (names, alias ==> AT\dG\{5})
+        # In case it finds the gene (and saves it into the variable gene_id), I check if that gene
+        # corresponds to the gene id it was searching. It true, it will add the protein
+        if protein_alias && protein_alias.length > 1
+          protein_alias.each do |name|
+            if name.upcase =~ /AT\dG\d{5}/
+              gene_id = name.upcase
+              if gene_id == gene.gene_id
+                @gene_database.add_protein(protein_id, gene)
+
+                #If not, it will create a new gen
+              else
+                gene_new = create_gene(gene_id)
+                if gene_new
+                  @gene_database.add_protein(protein_id, gene_new)
+                end
+              end
+            end
+          end
+        else
+          if protein_alias.upcase =~ /AT\dG\d{5}/
             gene_id = name.upcase
             if gene_id == gene.gene_id
               @gene_database.add_protein(protein_id, gene)
             else
-              gene_new = create_gene(gene_id)
-                if gene_new
-                  @gene_database.add_protein(protein_id, gene_new)
-                end
-
+              puts "alias not found"
             end
           end
         end
@@ -223,6 +239,7 @@ class Generate_database
         begin
           conf_value = interaction['confidenceList']['confidence']['value'].to_f
         rescue
+          # Here we get the confidence value and type and save it into variables (conf_value, conf_type)
           interaction['confidenceList']['confidence'].each do |conf|
             if conf['value'] =~ /\d\.\d+/
               conf_value = conf['value'].to_f
@@ -233,7 +250,7 @@ class Generate_database
         end
         if conf_value > 0.1
           # Confidence value to only return valuable information (value must be modified)
-
+          # Most of them hade between 0.3 and 0.5
 
           # If protein_1 exists, tell me it's name
           protein_1 = @gene_database.get_protein(protein_name_1)
@@ -250,8 +267,8 @@ class Generate_database
           # If protein_2 does not exist, go to Togows and look for the name
           if protein_1 && protein_2
             @gene_database.add_ppi(protein_1, protein_2, conf_type, conf_value)
-          # else
-          #   puts "Cannot insert PPI for #{protein_name_1} and #{protein_name_2}"
+            # else
+            #   puts "Cannot insert PPI for #{protein_name_1} and #{protein_name_2}"
             if !protein_1
               puts "- #{protein_name_1} not found"
             end
