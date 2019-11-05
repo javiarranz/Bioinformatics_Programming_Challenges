@@ -68,3 +68,8 @@ class Gene
   end
 
 end
+
+# CLASS PROTEIN TO STORE THE INFORMATION OF EACH PROTEIN
+# linked genes and print functions ARE NOT USED HERE!!
+# this functions were imported from last exercise and
+# I decided not tu delete them in case I need them in the future

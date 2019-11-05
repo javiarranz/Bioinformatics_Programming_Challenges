@@ -17,3 +17,6 @@ class SqlLite
     end
   end
 end
+
+
+# CLASS TO COMMUNICATE WITH THE DATABASE

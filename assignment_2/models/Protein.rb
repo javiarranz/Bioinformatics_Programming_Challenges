@@ -22,3 +22,5 @@ class Protein
   end
 
 end
+
+# CLASS PROTEIN TO STORE THE INFORMATION OF EACH PROTEIN

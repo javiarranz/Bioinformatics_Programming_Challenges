@@ -35,6 +35,8 @@ class Generate_database
     end
   end
 
+  # This are the functions that we'll need for generating our database
+
   def get_original_gene_ids
     # I create a list containing all locus gene and I save the original ids to create the networks
     gene_rows = @arabidopsis_genelist.rows
@@ -47,7 +49,6 @@ class Generate_database
     end
     @original_genes
   end
-
 
   def get_all_genes
     @all_genes = []
@@ -79,7 +80,7 @@ class Generate_database
     puts "**                             **"
     puts "**      ESTIMATED TIME:        **"
     puts "**                             **"
-    puts "**        8 MIN 45 SEG         **"
+    puts "**        15 MIN 30 SEG        **"
     puts "**                             **"
     puts "*********************************"
     puts "\n\n\n\n"
@@ -135,10 +136,7 @@ class Generate_database
     end
     # end
   end
-  # I found that when the gene list had 280 different genes, the PPI list was
-  # not including new interactions and that the list was going to increase to
-  # infinite, so I cut the process at 290 and use the 115 interactions that
-  # are found in the ppi table of the database for the creation of the networks
+
 
   #---------------------------------------------------------#
   #---------------------------------------------------------#
@@ -180,7 +178,6 @@ class Generate_database
     false
     # end
   end
-
 
   def create_annotations(gene, protein_name)
 
