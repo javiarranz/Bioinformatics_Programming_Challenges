@@ -23,6 +23,9 @@ class Generate_database
     @psicquic_api = PsicquicRestApi.new
     @gene_database = GeneDatabase.new
     @original_genes = []
+
+    @file_name = '2_ArabidopsisSubNetwork_GeneList.tsv'
+    puts @file_name
     parse_original_file
     if clean
       puts 'Cleaning Database...'
@@ -76,13 +79,16 @@ class Generate_database
     # creating all the anotations of each gene
 
     # # I create a list containing all locus gene and I save the original ids to create the networks
-    # @original_genes = []
-    # gene_rows.each do |row|
-    #   created_gene = create_gene(row['Gene_ID'])
-    #   if created_gene
-    #     @original_genes.append(created_gene.gene_id)
-    #   end
-    # end
+    @original_genes = []
+    gene_rows.each do |row|
+      puts "Read: #{row['Gene_ID']}"
+      created_gene = create_gene(row['Gene_ID'])
+      if created_gene
+        puts " -- Gene created: #{created_gene.gene_id}"
+        @original_genes.append(created_gene)
+        extract_gene_information(created_gene)
+      end
+    end
     #---------------------------------------------------------#
     #---------------------------------------------------------#
     #---------------------------------------------------------#
@@ -93,27 +99,26 @@ class Generate_database
     # each gene, adding them to the database and creating also
     # those genes that are necessary but are not in the list Arabidopsis.tsv
 
-    genes_list = @gene_database.get_all_genes_without_linked
+    # genes_list = @gene_database.get_all_genes_without_linked
 
 
-    # Psicquiq ==> I search for the information I need in the web that gives me the interactions
-    genes_list.each do |gene|
-      if genes_list.length < 290 #save point to infinite interactions between genes
-        psicquic_entry = @psicquic_api.get(gene.gene_id, 'xml25')
-        if psicquic_entry
-          puts "*** Adding interactions for Gene #{gene.gene_id}"
-          #puts "\t*** Introducing interactors for #{gene.gene_id}..."
-          get_interactors(psicquic_entry, gene)
-          protein = @gene_database.get_protein_by_gene(gene)
-          #puts "\t*** Introducing interactions for #{gene.gene_id}..."
-          get_interactions(psicquic_entry, protein.protein_id)
-          # else
-          #   puts "*** Interactions not found for  Gene #{gene.gene_id}"
-        end
-      end
-    end
   end
 
+  def extract_gene_information(gene)
+    # Psicquiq ==> I search for the information I need in the web that gives me the interactions
+    psicquic_entry = @psicquic_api.get(gene.gene_id, 'xml25')
+    if psicquic_entry
+      puts "*** Adding interactions for Gene #{gene.gene_id}"
+      #puts "\t*** Introducing interactors for #{gene.gene_id}..."
+      get_interactors(psicquic_entry, gene)
+      protein = @gene_database.get_protein_by_gene(gene)
+      #puts "\t*** Introducing interactions for #{gene.gene_id}..."
+      get_interactions(psicquic_entry, protein.protein_id)
+      # else
+      #   puts "*** Interactions not found for  Gene #{gene.gene_id}"
+    end
+    # end
+  end
   # I found that when the gene list had 280 different genes, the PPI list was
   # not including new interactions and that the list was going to increase to
   # infinite, so I cut the process at 290 and use the 115 interactions that
@@ -141,28 +146,30 @@ class Generate_database
 
   def parse_original_file
     path_fixtures = './assignment_2/fixtures'
-    @arabidopsis_genelist = FileParser.new(path_fixtures, 'ArabidopsisSubNetwork_GeneList.tsv')
+    @arabidopsis_genelist = FileParser.new(path_fixtures, @file_name)
   end
 
   def create_gene(gene_id, protein_name = false)
-    genes_list = @gene_database.get_all_genes_without_linked
-    if genes_list.length < 290
-      gene = @gene_database.add_gene(gene_id)
-      if gene
-        if protein_name
-          @gene_database.add_protein(protein_name, gene)
-        end
-        create_annotations(gene, protein_name)
-        return gene
+    # genes_list = @gene_database.get_all_genes_without_linked
+    # if genes_list.length < 290
+    gene = @gene_database.add_gene(gene_id)
+    if gene
+      puts "__ Creating Gene #{gene.gene_id}"
+      if protein_name
+        @gene_database.add_protein(protein_name, gene)
       end
-      false
+      create_annotations(gene, protein_name)
+      return gene
     end
+    false
+    # end
   end
 
 
   def create_annotations(gene, protein_name)
 
     puts "*** Introducing the gene #{gene.gene_id} and its annotations..."
+    puts "    - Getting Kegg List"
     togows_entry_kegg = @togo_api.get("kegg-genes", "ath:#{gene.gene_id}", "pathways", "json")
     togows_entry_kegg = JSON.parse(togows_entry_kegg)
     if togows_entry_kegg && togows_entry_kegg.length > 0
@@ -173,6 +180,7 @@ class Generate_database
     else
       puts "    - Not found #{gene.gene_id} in togows kegg-genes database"
     end
+    puts "    - Getting Go List"
     togows_entry_go = @togo_api.get("ebi-uniprot", "#{gene.gene_id}", "dr", "json")
     togows_entry_go = JSON.parse(togows_entry_go)
     if togows_entry_go && togows_entry_go.length > 0
@@ -234,86 +242,89 @@ class Generate_database
   end
 
   def check_interaction(interaction, protein_id)
-    genes_list = @gene_database.get_all_genes_without_linked
-    if genes_list.length < 290
-      exceptions = ["MI:0018", "MI:0397"]
-      if !exceptions.include? interaction["xref"]["primaryRef"]["refTypeAc"]
-        # Remove interactions detected by "two hybrib" and "two hybrid array" (too many false positives)
-        proteins = interaction['names']['shortLabel'].split('-')
-        # Always insert in same order ()
-        # Protein_1 is the parameter and protein_2 is the other one, no matter the order
-        protein_name_1 = protein_id
-        protein_name_2 = proteins[0] == protein_id ? proteins[1] : proteins[0]
+    # genes_list = @gene_database.get_all_genes_without_linked
+    # if genes_list.length < 290
+    exceptions = ["MI:0018", "MI:0397"]
+    if !exceptions.include? interaction["xref"]["primaryRef"]["refTypeAc"]
+      # Remove interactions detected by "two hybrib" and "two hybrid array" (too many false positives)
+      proteins = interaction['names']['shortLabel'].split('-')
+      # Always insert in same order ()
+      # Protein_1 is the parameter and protein_2 is the other one, no matter the order
+      protein_name_1 = protein_id
+      protein_name_2 = proteins[0] == protein_id ? proteins[1] : proteins[0]
 
-        if protein_name_1 != protein_name_2 # If both names are different means that is not the same protein
-          conf_type = "unknown"
-          conf_value = 0.0
-          begin
-            conf_value = interaction['confidenceList']['confidence']['value'].to_f
-          rescue
-            interaction['confidenceList']['confidence'].each do |conf|
-              if conf['value'] =~ /\d\.\d+/
-                conf_value = conf['value'].to_f
-              else
-                conf_type = conf['value']
-              end
+      if protein_name_1 != protein_name_2 # If both names are different means that is not the same protein
+        conf_type = "unknown"
+        conf_value = 0.0
+        begin
+          conf_value = interaction['confidenceList']['confidence']['value'].to_f
+        rescue
+          interaction['confidenceList']['confidence'].each do |conf|
+            if conf['value'] =~ /\d\.\d+/
+              conf_value = conf['value'].to_f
+            else
+              conf_type = conf['value']
             end
           end
-          if conf_value > 0.1
-            # Confidence value to only return valuable information (value must be modified)
+        end
+        if conf_value > 0.1
+          # Confidence value to only return valuable information (value must be modified)
 
-            genes_list = @gene_database.get_all_genes_without_linked
-            # If protein_1 exists, tell me it's name
-            protein_1 = @gene_database.get_protein(protein_name_1)
-            # If protein_1 does not exist, go to Togows and look for the name
+          # genes_list = @gene_database.get_all_genes_without_linked
+          # If protein_1 exists, tell me it's name
+          protein_1 = @gene_database.get_protein(protein_name_1)
+          # If protein_1 does not exist, go to Togows and look for the name
+          if !protein_1
+            protein_1 = get_protein(protein_name_1)
+          end
+
+          # If protein_2 exists, tell me it's name
+          protein_2 = @gene_database.get_protein(protein_name_2)
+          if !protein_2
+            protein_2 = get_protein(protein_name_2)
+          end
+          # If protein_2 does not exist, go to Togows and look for the name
+          if protein_1 && protein_2 # && genes_list.length < 290
+            @gene_database.add_ppi(protein_1, protein_2, conf_type, conf_value)
+            # else
+            #   puts "Cannot insert PPI for #{protein_name_1} and #{protein_name_2}"
             if !protein_1
-              protein_1 = get_protein(protein_name_1)
+              puts "- #{protein_name_1} not found"
             end
-
-            # If protein_2 exists, tell me it's name
-            protein_2 = @gene_database.get_protein(protein_name_2)
             if !protein_2
-              protein_2 = get_protein(protein_name_2)
-            end
-            # If protein_2 does not exist, go to Togows and look for the name
-            if protein_1 && protein_2 && genes_list.length < 290
-              @gene_database.add_ppi(protein_1, protein_2, conf_type, conf_value)
-              # else
-              #   puts "Cannot insert PPI for #{protein_name_1} and #{protein_name_2}"
-              if !protein_1
-                puts "- #{protein_name_1} not found"
-              end
-              if !protein_2
-                puts "- #{protein_name_2} not found"
-              end
+              puts "- #{protein_name_2} not found"
             end
           end
         end
       end
     end
+    # end
   end
 
   def get_protein(protein_name)
-    genes_list = @gene_database.get_all_genes_without_linked
-    if genes_list.length < 290
-      protein = false
-      togows_gene_db = @togo_api.get("ebi-uniprot", "#{protein_name}", "gn", "json")
-      togows_gene_db = JSON.parse(togows_gene_db)
-      if togows_gene_db.length > 0
-        togows_gene = togows_gene_db[0][0]
+    # genes_list = @gene_database.get_all_genes_without_linked
+    # if genes_list.length < 290
+    protein = false
+    puts "    - Getting Protein New Protein "
+    togows_gene_db = @togo_api.get("ebi-uniprot", "#{protein_name}", "gn", "json")
+    togows_gene_db = togows_gene_db ? JSON.parse(togows_gene_db) : []
+    if togows_gene_db.length > 0
+      togows_gene = togows_gene_db[0][0]
+      if togows_gene && togows_gene['loci'] && togows_gene['loci'][0]
         gene_id = togows_gene['loci'][0].upcase
         gene = @gene_database.get_gene(gene_id)
         if !gene
+          puts "  -- Gene from protein #{protein_name} not found"
           gene = create_gene(gene_id, protein_name)
         end
         if gene
           protein = @gene_database.add_protein(protein_name, gene)
         end
       end
-      protein
+
     end
+    protein
+    # end
   end
-
-
 end
 

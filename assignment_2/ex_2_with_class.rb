@@ -49,9 +49,9 @@ puts "\n\n\n\n"
 
 puts "ASSIGNMENT 2"
 @gene_database = GeneDatabase.new()
-#generateDatabase = Generate_database.new(true)         # ==> TRUE TO CLEAN THE DATABASE
+# generateDatabase = Generate_database.new(true)         # ==> TRUE TO CLEAN THE DATABASE
 generateDatabase = Generate_database.new(false) # ==> FALSE TO NOT CLEAN THE DATABASE
-#generateDatabase.create_database()
+generateDatabase.create_database
 
 # DESDE AQUI
 #def create_network(levels = 3, gene)
