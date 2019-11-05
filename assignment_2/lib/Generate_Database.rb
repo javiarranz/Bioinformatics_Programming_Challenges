@@ -120,10 +120,9 @@ class Generate_database
   #---------------------------------------------------------#
 
   # EBI API ==> (not used)
-
+  #-----
   # genes_list.each do |gene|
   #   ebifetch = @ebi_api.get("ensemblgenomesgene", "embl", gene.gene_id, "raw")
-  #
   #   if ebifetch
   #     puts "Encontrado para #{gene.gene_id}"
   #   else
