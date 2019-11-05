@@ -144,6 +144,28 @@ class GeneDatabase
     genes
   end
 
+  # def get_all_genes_if_in_table()
+  #   query = "SELECT * FROM #{@geneTable}"
+  #   n_gene = @sqllite.execute(query)
+  #   genes = []
+  #
+  #   arabidopsis_genelist = FileParser.new(path_fixtures, 'ArabidopsisSubNetwork_GeneList.tsv')
+  #   gene_rows = arabidopsis_genelist.rows
+  #
+  #   # I create a list containing all locus gene
+  #   gene_rows_list = []
+  #   gene_rows.each do |row|
+  #     gene_id = row["Gene_ID"]
+  #     gene_rows_list.append(gene_id)
+  #   end
+  #
+  #   n_gene.each do |gene|
+  #     if gene_rows_list.include? gene
+  #     genes.push(Gene.new(gene[0], gene[1], gene[2]))
+  #   end
+  #   genes
+  # end
+
   def get_gene(gene_id)
     gene = get_single_gen(gene_id)
     if gene
@@ -228,7 +250,6 @@ class GeneDatabase
 
   def get_single_protein(protein_id)
     query = "SELECT * FROM #{@proteinTable} WHERE protein_id = '#{protein_id}'"
-
     db_protein_list = @sqllite.execute(query)
     if db_protein_list.length > 0
       db_protein = db_protein_list[0]
@@ -244,11 +265,16 @@ class GeneDatabase
 
   def get_single_protein_by_gen(gene)
     query = "SELECT * FROM #{@proteinTable} WHERE gene_id = '#{gene.gene_id}'"
-
-    db_protein_list = @sqllite.execute(query)
-    db_protein = db_protein_list[0]
-    protein_id = db_protein[0]
-    Protein.new(protein_id, gene)
+    if query != nil
+      db_protein_list = @sqllite.execute(query)
+      if db_protein_list.respond_to? ('each')
+        db_protein = db_protein_list[0]
+        protein_id = db_protein[0]
+        Protein.new(protein_id, gene)
+      else
+        puts "FINISHED"
+      end
+    end
   end
 
   def get_kegg_from_gene(gene_id)
