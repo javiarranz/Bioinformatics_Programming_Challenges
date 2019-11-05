@@ -115,13 +115,18 @@ end
 # To create a new output file, I just use a File.open("new_file,"w") to create it
 # then i use file.puts to write in the database and I created a personal format where
 # all the data is shown in the output file
+# HERE I ALSO CALL THE RECURSIVE FUNCTION WHILE CREATING THE FILE
 
-
-File.open("assignment_2/output_all_networks.txt", "w") do |file|
+name_file = "Networks_original"
+name_file = "Networks_all_database"
+File.open("assignment_2/outputs/" + name_file +".txt", "w") do |file|
   interaction_network_list = []
   gene_rows_list.each_with_index do |gene, index|
     # Added first Gene Node
-    interaction_network = recursive_network(InteractionNetwork.new(index + 1), gene, 5)
+    interaction_network = recursive_network(InteractionNetwork.new(index + 1), gene, 4)
+                      # As I found many networks with 1-2 nodes, I have set a
+                      # MINIMAL NUMBER OF NODES TO INCLUDE AS A NETWORK
+                      # If you want all, just change the value (currently = 5)
     if interaction_network.node_list.length > 5
       interaction_network_list.push(interaction_network)
       puts "Network #{interaction_network.network_id} with #{interaction_network.node_list.length} nodes"

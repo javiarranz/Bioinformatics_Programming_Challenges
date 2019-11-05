@@ -206,7 +206,6 @@ class Generate_database
       if !protein_name && togows_entry_go[0].key?("IntAct")
         intAct = togows_entry_go[0]["IntAct"][0]
         intAct.each do |act|
-          # TODO aqui iba un rescue
           @gene_database.add_protein(act, gene)
         end
       end
