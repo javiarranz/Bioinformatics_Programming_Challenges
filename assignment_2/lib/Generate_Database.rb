@@ -14,6 +14,7 @@ class Generate_database
   attr_reader :arabidopsis_genelist
 
   attr_reader :gene_database
+  attr_reader :original_genes
 
   def initialize(clean = false)
     puts "Start Second Assignment"
@@ -21,30 +22,34 @@ class Generate_database
     @togo_api = TogoRestApi.new
     @psicquic_api = PsicquicRestApi.new
     @gene_database = GeneDatabase.new
-
+    @original_genes = []
+    parse_original_file
     if clean
       puts 'Cleaning Database...'
       @gene_database.clean_tables
     end
   end
 
-  def create_database()
+  def get_original_gene_ids
+    # I create a list containing all locus gene and I save the original ids to create the networks
+    gene_rows = @arabidopsis_genelist.rows
+    gene_rows.each do |row|
+      gene = Gene.new(row['Gene_ID'])
+      created_gene = gene ? @gene_database.get_gene(gene.gene_id) : false
+      if created_gene
+        @original_genes.append(created_gene)
+      end
+    end
+  end
+
+  def create_database
     puts %(\n\n** Introducing data into the database..
 -------------------------------------------------------------------------------------------------------------------------------------\n\n)
 
     # Here I start reading the file with the genes (was txt, but I transformed it into tsv)
 
-    path_fixtures = './assignment_2/fixtures'
-    #@arabidopsis_genelist = FileParser.new(path_fixtures, 'test_ArabidopsisSubNetwork_GeneList.tsv')
-    @arabidopsis_genelist = FileParser.new(path_fixtures, 'ArabidopsisSubNetwork_GeneList.tsv')
     gene_rows = @arabidopsis_genelist.rows
 
-    # I create a list containing all locus gene
-    gene_rows_list = []
-    gene_rows.each do |row|
-      gene_id = row["Gene_ID"]
-      gene_rows_list.append(gene_id)
-    end
 
     # Then I create the genes in the gene table using the function create gen and I keep all the genes in a list
     puts "*** Introducing genes into database..."
@@ -65,55 +70,54 @@ class Generate_database
     #---------------------------------------------------------#
     #---------------------------------------------------------#
 
-        # Here I create the genes and introduce them into the database
-        # I do this iterating the rows of the list Arabidopsis.tsv and
-        # calling a function create gene that looks for the gene in togo
-        # creating all the anotations of each gene
+    # Here I create the genes and introduce them into the database
+    # I do this iterating the rows of the list Arabidopsis.tsv and
+    # calling a function create gene that looks for the gene in togo
+    # creating all the anotations of each gene
 
-    gene_rows.each do |row|
-      create_gene(row['Gene_ID'])
-    end
-
+    # # I create a list containing all locus gene and I save the original ids to create the networks
+    # @original_genes = []
+    # gene_rows.each do |row|
+    #   created_gene = create_gene(row['Gene_ID'])
+    #   if created_gene
+    #     @original_genes.append(created_gene.gene_id)
+    #   end
+    # end
     #---------------------------------------------------------#
     #---------------------------------------------------------#
     #---------------------------------------------------------#
 
 
-        # Here I look for the psicquic entries of each gene
-        # and finding all the interactors and interactions of
-        # each gene, adding them to the database and creating also
-        # those genes that are necessary but are not in the list Arabidopsis.tsv
+    # Here I look for the psicquic entries of each gene
+    # and finding all the interactors and interactions of
+    # each gene, adding them to the database and creating also
+    # those genes that are necessary but are not in the list Arabidopsis.tsv
 
-    genes_list = @gene_database.get_all_genes_without_linked()
-
+    genes_list = @gene_database.get_all_genes_without_linked
 
 
     # Psicquiq ==> I search for the information I need in the web that gives me the interactions
-    begin
-      genes_list.each do |gene|
-        genes_list = @gene_database.get_all_genes_without_linked()
-        if genes_list.length < 290        #save point to infinite interactions between genes
-          psicquic_entry = @psicquic_api.get(gene.gene_id, 'xml25')
-          if psicquic_entry
-            puts "*** Adding interactions for Gene #{gene.gene_id}"
-            #puts "\t*** Introducing interactors for #{gene.gene_id}..."
-            get_interactors(psicquic_entry, gene)
-            protein = @gene_database.get_protein_by_gene(gene)
-            #puts "\t*** Introducing interactions for #{gene.gene_id}..."
-            get_interactions(psicquic_entry, protein.protein_id)
-          else
-            #puts "*** Interactions not found for  Gene #{gene.gene_id}"
-          end
+    genes_list.each do |gene|
+      if genes_list.length < 290 #save point to infinite interactions between genes
+        psicquic_entry = @psicquic_api.get(gene.gene_id, 'xml25')
+        if psicquic_entry
+          puts "*** Adding interactions for Gene #{gene.gene_id}"
+          #puts "\t*** Introducing interactors for #{gene.gene_id}..."
+          get_interactors(psicquic_entry, gene)
+          protein = @gene_database.get_protein_by_gene(gene)
+          #puts "\t*** Introducing interactions for #{gene.gene_id}..."
+          get_interactions(psicquic_entry, protein.protein_id)
+          # else
+          #   puts "*** Interactions not found for  Gene #{gene.gene_id}"
         end
-      rescue
       end
     end
   end
 
-        # I found that when the gene list had 280 different genes, the PPI list was
-        # not including new interactions and that the list was going to increase to
-        # infinite, so I cut the process at 290 and use the 115 interactions that
-        # are found in the ppi table of the database for the creation of the networks
+  # I found that when the gene list had 280 different genes, the PPI list was
+  # not including new interactions and that the list was going to increase to
+  # infinite, so I cut the process at 290 and use the 115 interactions that
+  # are found in the ppi table of the database for the creation of the networks
 
   #---------------------------------------------------------#
   #---------------------------------------------------------#
@@ -134,6 +138,11 @@ class Generate_database
   #------------------------------------------------------------------------------------------------------------>
 
   private
+
+  def parse_original_file
+    path_fixtures = './assignment_2/fixtures'
+    @arabidopsis_genelist = FileParser.new(path_fixtures, 'ArabidopsisSubNetwork_GeneList.tsv')
+  end
 
   def create_gene(gene_id, protein_name = false)
     genes_list = @gene_database.get_all_genes_without_linked
@@ -176,10 +185,8 @@ class Generate_database
       if !protein_name && togows_entry_go[0].key?("IntAct")
         intAct = togows_entry_go[0]["IntAct"][0]
         intAct.each do |act|
-          begin
-            @gene_database.add_protein(act, gene)
-          rescue
-          end
+          # TODO aqui iba un rescue
+          @gene_database.add_protein(act, gene)
         end
       end
     else

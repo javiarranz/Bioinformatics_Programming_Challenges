@@ -9,9 +9,7 @@ class Gene
   attr_accessor :kegg_list
 
   def initialize(gene_id = "AT0G00000", gene_name = "", mutant_phenotype = "")
-    @linked_genes = []
-    @go_list = []
-    @kegg_list = []
+
     gene_id = gene_id.upcase
     gene_id = gene_id.gsub("\n", '')
     gene_name = gene_name.gsub("\n", '')
@@ -28,6 +26,11 @@ class Gene
       @gene_name = @gene_id
     end
     @mutant_phenotype = mutant_phenotype
+
+    @linked_genes = []
+    @go_list = []
+    @kegg_list = []
+    @protein = nil
   end
 
   def add_linked_gene(gene)

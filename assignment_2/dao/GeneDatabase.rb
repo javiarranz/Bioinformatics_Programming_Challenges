@@ -177,28 +177,38 @@ class GeneDatabase
         gene_linked = get_single_gen(gene_linked_data[1])
         gene.add_linked_gene(gene_linked)
       end
+
+      # Insert proteins if appears on the DB
       protein = get_single_protein_by_gen(gene)
-      gene.protein = protein
-      kegg_db = get_kegg_from_gene(gene)
-      kegg_list = []
-      kegg_db.each do |kegg|
-        kegg_list.push({
-                           "id": kegg[2],
-                           "description": kegg[3]
+      if protein
+        gene.protein = protein
+      end
+
+      # Insert kegg if appears on the DB
+      kegg_db = get_kegg_from_gene(gene.gene_id)
+      if kegg_db
+        kegg_list = []
+        kegg_db.each do |kegg|
+          kegg_list.push({
+                             "id": kegg[2],
+                             "description": kegg[3]
+                         })
+        end
+        gene.kegg_list = kegg_list
+      end
+
+      go_db = get_go_from_gene(gene.gene_id)
+      # Insert go if appears on the DB
+      if go_db
+        go_list = []
+        go_db.each do |go|
+          go_list.push({
+                           "id": go[1],
+                           "description": go[2]
                        })
+        end
+        gene.go_list = go_list
       end
-      gene.kegg_list = kegg_list
-
-      go_db = get_go_from_gene(gene)
-
-      go_list = []
-      go_db.each do |go|
-        go_list.push({
-                         "id": go[1],
-                         "description": go[2]
-                     })
-      end
-      gene.go_list = go_list
     end
     gene
   end
@@ -267,20 +277,19 @@ class GeneDatabase
     query = "SELECT * FROM #{@proteinTable} WHERE gene_id = '#{gene.gene_id}'"
     if query != nil
       db_protein_list = @sqllite.execute(query)
-      if db_protein_list.respond_to? ('each')
+      if db_protein_list.length > 0
         db_protein = db_protein_list[0]
         protein_id = db_protein[0]
         Protein.new(protein_id, gene)
-      else
-        puts "FINISHED"
+      # else
+        # puts "FINISHED"
       end
     end
   end
 
   def get_kegg_from_gene(gene_id)
     query = "SELECT * FROM #{@keggTable} WHERE gene_id = '#{gene_id}'"
-    kegg_list = @sqllite.execute(query)
-    kegg_list[0]
+    @sqllite.execute(query)
   end
 
   def get_kegg_from_gene_and_kegg(gene_id, kegg_id)
@@ -295,8 +304,7 @@ class GeneDatabase
 
   def get_go_from_gene(gene_id)
     query = "SELECT * FROM #{@goTable} WHERE gene_id = '#{gene_id}'"
-    kegg_list = @sqllite.execute(query)
-    kegg_list[0]
+    @sqllite.execute(query)
   end
 
   def get_go_from_gene_and_go(gene_id, go_id)

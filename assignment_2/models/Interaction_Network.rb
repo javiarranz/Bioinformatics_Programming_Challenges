@@ -5,41 +5,19 @@ require './assignment_2/models/Protein'
 class InteractionNetwork
 
   attr_accessor :network_id # The number that identifies the network
-  attr_accessor :num_nodes # Number of nodes that the networks has
-  attr_accessor :members # Array containing the Gene objects from the given file that belong to the network
+  attr_accessor :node_list # Array containing the nodes of the network
 
-  def initialize (network_id = "X", num_nodes = 0, members = Hash.new )
-
+  def initialize (network_id)
     @network_id = network_id
-    @num_nodes = num_nodes
-    @members = members
+    @node_list = []
   end
 
   def get_gene_interactions(gene)
-    list = gene.get_ppi
-    list
+    gene.get_ppi
   end
 
   def add_node(gene)
-    node_list = []
-    node_list.append(gene)
+    @node_list.push(gene)
   end
-
-  #TODO this functions
-  #
-  # def add_network
-  #
-  # end
-  #
-  # def remove_network
-  #
-  # end
-  #
-  #
-  # def assign
-  #
-  # end
-  #
-#
 
 end
