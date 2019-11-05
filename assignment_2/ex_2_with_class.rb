@@ -36,38 +36,48 @@ puts "\n\n\n\n"
 #-----------------------------------------------------------------------------------------#
 
 
-# START WITH TRUE THE FIRST TIME TO CREATE DATABASE, THEN CHANGE IT TO FALSE AND USE THE DATABASE
+            # WHEN RUNNING THE EXERCISE FOR THE FIRST TIME
+            # START WITH TRUE THE FIRST TIME TO CREATE THE DATABASE
+            # THEN CHANGE IT TO FALSE AND USE THE DATABASE
 
 
-generateDatabase = Generate_database.new(true)         # ==> TRUE TO CLEAN THE DATABASE
+#-----------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------#
+
+puts "ASSIGNMENT 2"
+
+#generateDatabase = Generate_database.new(true)         # ==> TRUE TO CLEAN THE DATABASE
 #generateDatabase = Generate_database.new(false)   # ==> FALSE TO NOT CLEAN THE DATABASE
-generateDatabase.create_database()
+#generateDatabase.create_database()
 
 
-# def create_network(levels = 3, gene)
-#   gene_rows_list.each do |gene|
-#
-#     @interaction_network = InteractionNetwork.new()
-#     nodes_list = network.add_node(gene.gsub("\n", ""))
-#
-# # Level 1
-#     first_level_genes = @interaction_network.get_gene_interactions(gene)
-#     first_level_genes.each do |gene_l2|
-#       @interaction_network.add_node(gene_l2, gene)
-#       puts "nodes list contains #{nodes_list.length} genes"
-#       # Level 2
-#       @interaction_network.get_gene_interactions(gene_l2).each do |gene_l3|
-#         network.add_node(gene_l3, gene_l2)
-#         puts "nodes list contains #{nodes_list.length} genes"
-#         # Level 3
-#         @interaction_network.get_gene_interactions(gene_l3).each do |gene_l4|
-#           network.add_node(gene_l4, gene_l3)
-#           puts "nodes list contains #{nodes_list.length} genes"
-#         end
-#       end
-#     end
-#   end
-# end
+def create_network(levels = 3, gene)
+  #gene_rows_list.each do |gene|
+
+    @interaction_network = InteractionNetwork.new()
+    nodes_list = network.add_node(gene.gsub("\n", ""))
+
+# Level 1
+    first_level_genes = @interaction_network.get_gene_interactions(gene)
+    first_level_genes.each do |gene_l2|
+      @interaction_network.add_node(gene_l2, gene)
+      puts "nodes list contains #{nodes_list.length} genes"
+      # Level 2
+      @interaction_network.get_gene_interactions(gene_l2).each do |gene_l3|
+        network.add_node(gene_l3, gene_l2)
+        puts "nodes list contains #{nodes_list.length} genes"
+        # Level 3
+        @interaction_network.get_gene_interactions(gene_l3).each do |gene_l4|
+          network.add_node(gene_l4, gene_l3)
+          puts "nodes list contains #{nodes_list.length} genes"
+        end
+      end
+    end
+  end
+end
 
 
 #end

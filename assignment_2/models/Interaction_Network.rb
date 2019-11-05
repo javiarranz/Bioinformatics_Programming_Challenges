@@ -16,7 +16,8 @@ class InteractionNetwork
   end
 
   def get_gene_interactions(gene)
-    gene.get_ppi
+    list = gene.get_ppi
+    list
   end
 
   def add_node(gene)

@@ -60,31 +60,39 @@ class Generate_database
     puts "*********************************"
     puts "\n\n\n\n"
 
+
+    #---------------------------------------------------------#
+    #---------------------------------------------------------#
+    #---------------------------------------------------------#
+
+        # Here I create the genes and introduce them into the database
+        # I do this iterating the rows of the list Arabidopsis.tsv and
+        # calling a function create gene that looks for the gene in togo
+        # creating all the anotations of each gene
+
     gene_rows.each do |row|
       create_gene(row['Gene_ID'])
     end
 
+    #---------------------------------------------------------#
+    #---------------------------------------------------------#
+    #---------------------------------------------------------#
 
-    # EBI API ==> (not used)
 
-    # genes_list.each do |gene|
-    #   ebifetch = @ebi_api.get("ensemblgenomesgene", "embl", gene.gene_id, "raw")
-    #
-    #   if ebifetch
-    #     puts "Encontrado para #{gene.gene_id}"
-    #   else
-    #     puts "No Encontrado para #{gene.gene_id}"
-    #   end
-    # end
-    #
+        # Here I look for the psicquic entries of each gene
+        # and finding all the interactors and interactions of
+        # each gene, adding them to the database and creating also
+        # those genes that are necessary but are not in the list Arabidopsis.tsv
 
     genes_list = @gene_database.get_all_genes_without_linked()
+
+
 
     # Psicquiq ==> I search for the information I need in the web that gives me the interactions
     begin
       genes_list.each do |gene|
         genes_list = @gene_database.get_all_genes_without_linked()
-        if genes_list.length < 290
+        if genes_list.length < 290        #save point to infinite interactions between genes
           psicquic_entry = @psicquic_api.get(gene.gene_id, 'xml25')
           if psicquic_entry
             puts "*** Adding interactions for Gene #{gene.gene_id}"
@@ -101,6 +109,28 @@ class Generate_database
       end
     end
   end
+
+        # I found that when the gene list had 280 different genes, the PPI list was
+        # not including new interactions and that the list was going to increase to
+        # infinite, so I cut the process at 290 and use the 115 interactions that
+        # are found in the ppi table of the database for the creation of the networks
+
+  #---------------------------------------------------------#
+  #---------------------------------------------------------#
+  #---------------------------------------------------------#
+
+  # EBI API ==> (not used)
+
+  # genes_list.each do |gene|
+  #   ebifetch = @ebi_api.get("ensemblgenomesgene", "embl", gene.gene_id, "raw")
+  #
+  #   if ebifetch
+  #     puts "Encontrado para #{gene.gene_id}"
+  #   else
+  #     puts "No Encontrado para #{gene.gene_id}"
+  #   end
+  # end
+
 
   #------------------------------------------------------------------------------------------------------------>
 
