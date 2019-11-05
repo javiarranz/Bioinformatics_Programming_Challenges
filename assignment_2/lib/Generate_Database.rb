@@ -15,6 +15,7 @@ class Generate_database
 
   attr_reader :gene_database
   attr_reader :original_genes
+  attr_reader :all_genes
 
   def initialize(clean = false)
     puts "Start Second Assignment"
@@ -24,12 +25,13 @@ class Generate_database
     @gene_database = GeneDatabase.new
     @original_genes = []
 
-    @file_name = '2_ArabidopsisSubNetwork_GeneList.tsv'
+    @file_name = 'ArabidopsisSubNetwork_GeneList.tsv'
     puts @file_name
     parse_original_file
     if clean
       puts 'Cleaning Database...'
       @gene_database.clean_tables
+      create_database
     end
   end
 
@@ -43,6 +45,20 @@ class Generate_database
         @original_genes.append(created_gene)
       end
     end
+    @original_genes
+  end
+
+
+  def get_all_genes
+    @all_genes = []
+    gene_rows = @gene_database.get_all_genes_without_linked
+    gene_rows.each do |gene|
+      created_gene = gene ? @gene_database.get_gene(gene.gene_id) : false
+      if created_gene
+        @all_genes.append(created_gene)
+      end
+    end
+    @all_genes
   end
 
   def create_database
