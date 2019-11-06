@@ -3,8 +3,6 @@ class Protein
 
   attr_accessor :protein_id
   attr_accessor :gene
-  # attr_accessor :intact_id
-  # attr_accessor :network
 
 
   def initialize(protein_id, gene)

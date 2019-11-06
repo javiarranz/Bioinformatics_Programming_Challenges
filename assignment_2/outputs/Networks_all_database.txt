@@ -1,4 +1,4 @@
-Network 27 with 14 nodes
+Network 20 with 14 nodes
     Gen AT1G03130
        - Keggs:
               - ath00195 => Photosynthesis
@@ -189,7 +189,7 @@ Network 27 with 14 nodes
              - GO:0016021 with Term Name: C:integral component of membrane
              - GO:0005634 with Term Name: C:nucleus
              - GO:0009579 with Term Name: C:thylakoid
-Network 45 with 43 nodes
+Network 25 with 43 nodes
     Gen AT4G17460
        - Keggs:
               - Not found
@@ -740,7 +740,7 @@ Network 45 with 43 nodes
              - GO:0008361 with Term Name: P:regulation of cell size
              - GO:0006355 with Term Name: P:regulation of transcription, DNA-templated
              - GO:0048364 with Term Name: P:root development
-Network 80 with 18 nodes
+Network 41 with 18 nodes
     Gen AT4G22890
        - Keggs:
               - Not found
@@ -979,7 +979,7 @@ Network 80 with 18 nodes
              - GO:0015977 with Term Name: P:carbon fixation
              - GO:0009853 with Term Name: P:photorespiration
              - GO:0015979 with Term Name: P:photosynthesis
-Network 110 with 12 nodes
+Network 49 with 12 nodes
     Gen AT3G01500
        - Keggs:
               - ath00910 => Nitrogen metabolism
@@ -1166,7 +1166,7 @@ Network 110 with 12 nodes
              - GO:0009751 with Term Name: P:response to salicylic acid
              - GO:0009651 with Term Name: P:response to salt stress
              - GO:0009611 with Term Name: P:response to wounding
-Network 136 with 8 nodes
+Network 61 with 8 nodes
     Gen AT3G49160
        - Keggs:
               - ath00010 => Glycolysis / Gluconeogenesis
@@ -1271,7 +1271,7 @@ Network 136 with 8 nodes
        - Go:
              - GO:0003676 with Term Name: F:nucleic acid binding
              - GO:0008270 with Term Name: F:zinc ion binding
-Network 146 with 43 nodes
+Network 63 with 43 nodes
     Gen AT5G14740
        - Keggs:
               - ath00910 => Nitrogen metabolism
@@ -1861,7 +1861,7 @@ Network 146 with 43 nodes
              - GO:0016021 with Term Name: C:integral component of membrane
              - GO:0042030 with Term Name: F:ATPase inhibitor activity
              - GO:0032780 with Term Name: P:negative regulation of ATPase activity
-Network 205 with 88 nodes
+Network 78 with 88 nodes
     Gen AT5G15850
        - Keggs:
               - Not found
@@ -3053,7 +3053,7 @@ Network 205 with 88 nodes
              - GO:0010218 with Term Name: P:response to far red light
              - GO:0010114 with Term Name: P:response to red light
              - GO:0048575 with Term Name: P:short-day photoperiodism, flowering
-Network 256 with 52 nodes
+Network 84 with 52 nodes
     Gen AT5G17300
        - Keggs:
               - Not found
@@ -3749,7 +3749,7 @@ Network 256 with 52 nodes
              - GO:0006355 with Term Name: P:regulation of transcription, DNA-templated
              - GO:0010223 with Term Name: P:secondary shoot formation
              - GO:0016021 with Term Name: C:integral component of membrane
-Network 306 with 7 nodes
+Network 94 with 7 nodes
     Gen AT1G54040
        - Keggs:
               - Not found
@@ -3904,7 +3904,7 @@ Network 306 with 7 nodes
              - GO:0009751 with Term Name: P:response to salicylic acid
              - GO:0005673 with Term Name: C:transcription factor TFIIE complex
              - GO:0006367 with Term Name: P:transcription initiation from RNA polymerase II promoter
-Network 310 with 19 nodes
+Network 96 with 19 nodes
     Gen AT3G48360
        - Keggs:
               - Not found
@@ -4296,7 +4296,7 @@ Network 310 with 19 nodes
              - GO:0003684 with Term Name: F:damaged DNA binding
              - GO:0006289 with Term Name: P:nucleotide-excision repair
              - GO:0043161 with Term Name: P:proteasome-mediated ubiquitin-dependent protein catabolic process
-Network 318 with 8 nodes
+Network 98 with 8 nodes
     Gen AT2G43010
        - Keggs:
               - ath04075 => Plant hormone signal transduction
@@ -4458,7 +4458,7 @@ Network 318 with 8 nodes
              - GO:0017006 with Term Name: P:protein-tetrapyrrole linkage
              - GO:0009585 with Term Name: P:red, far-red light phototransduction
              - GO:0006355 with Term Name: P:regulation of transcription, DNA-templated
-Network 328 with 107 nodes
+Network 101 with 107 nodes
     Gen AT3G28220
        - Keggs:
               - Not found
@@ -5680,7 +5680,7 @@ Network 328 with 107 nodes
        - Go:
              - GO:0005789 with Term Name: C:endoplasmic reticulum membrane
              - GO:0016021 with Term Name: C:integral component of membrane
-Network 444 with 18 nodes
+Network 109 with 18 nodes
     Gen AT1G71030
        - Keggs:
               - Not found
@@ -5935,7 +5935,7 @@ Network 444 with 18 nodes
              - GO:0016021 with Term Name: C:integral component of membrane
              - GO:0008289 with Term Name: F:lipid binding
              - GO:0006869 with Term Name: P:lipid transport
-Network 469 with 8 nodes
+Network 121 with 8 nodes
     Gen AT3G62410
        - Keggs:
               - Not found
@@ -6146,7 +6146,7 @@ Network 469 with 8 nodes
              - GO:0009416 with Term Name: P:response to light stimulus
              - GO:0009744 with Term Name: P:response to sucrose
              - GO:0016620 with Term Name: F:oxidoreductase activity, acting on the aldehyde or oxo group of donors, NAD or NADP as acceptor
-Network 474 with 10 nodes
+Network 124 with 10 nodes
     Gen AT3G16250
        - Keggs:
               - Not found
@@ -6346,7 +6346,7 @@ Network 474 with 10 nodes
              - GO:0030071 with Term Name: P:regulation of mitotic metaphase/anaphase transition
              - GO:0016021 with Term Name: C:integral component of membrane
              - GO:0004252 with Term Name: F:serine-type endopeptidase activity
-Network 489 with 7 nodes
+Network 133 with 7 nodes
     Gen AT1G29910
        - Keggs:
               - ath00196 => Photosynthesis - antenna proteins
@@ -6493,7 +6493,7 @@ Network 489 with 7 nodes
              - GO:0009736 with Term Name: P:cytokinin-activated signaling pathway
              - GO:0006355 with Term Name: P:regulation of transcription, DNA-templated
              - GO:0009735 with Term Name: P:response to cytokinin
-Network 492 with 25 nodes
+Network 134 with 25 nodes
     Gen AT1G69870
        - Keggs:
               - Not found
@@ -6740,7 +6740,7 @@ Network 492 with 25 nodes
              - GO:0005794 with Term Name: C:Golgi apparatus
              - GO:0016021 with Term Name: C:integral component of membrane
              - GO:0005739 with Term Name: C:mitochondrion
-Network 517 with 13 nodes
+Network 138 with 13 nodes
     Gen AT5G43750
        - Keggs:
               - Not found
@@ -6904,7 +6904,7 @@ Network 517 with 13 nodes
              - GO:2000769 with Term Name: P:regulation of establishment or maintenance of cell polarity regulating cell shape
              - GO:0008278 with Term Name: C:cohesin complex
              - GO:0007062 with Term Name: P:sister chromatid cohesion
-Network 530 with 10 nodes
+Network 143 with 10 nodes
     Gen AT3G61260
        - Keggs:
               - Not found
@@ -7073,7 +7073,7 @@ Network 530 with 10 nodes
              - GO:0000160 with Term Name: P:phosphorelay signal transduction system
              - GO:0005643 with Term Name: C:nuclear pore
              - GO:0017056 with Term Name: F:structural constituent of nuclear pore
-Network 539 with 16 nodes
+Network 147 with 16 nodes
     Gen AT5G38990
        - Keggs:
               - Not found
