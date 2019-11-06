@@ -3,7 +3,7 @@ Bioinformatics Programming Challenges
 
 
 
-### **Preinstall RUby Gems**
+### **Preinstall Ruby Gems**
 
 ```
 $ bundle install
