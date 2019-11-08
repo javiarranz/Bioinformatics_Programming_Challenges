@@ -1,10 +1,10 @@
 require 'rest-client'
-require './assignment_2/lib/rest/EbiDbfetchRestApi'
-require './assignment_2/lib/rest/TogoRestApi'
-require './assignment_2/lib/rest/PsicquicRestApi'
-require './assignment_2/lib/file_parser'
-require './assignment_2/dao/GeneDatabase'
-require './assignment_2/models/Gene'
+require './lib/rest/EbiDbfetchRestApi'
+require './lib/rest/TogoRestApi'
+require './lib/rest/PsicquicRestApi'
+require './lib/file_parser'
+require './dao/GeneDatabase'
+require './models/Gene'
 
 
 class Generate_database
@@ -159,7 +159,7 @@ class Generate_database
   private
 
   def parse_original_file
-    path_fixtures = './assignment_2/fixtures'
+    path_fixtures = './fixtures'
     @arabidopsis_genelist = FileParser.new(path_fixtures, @file_name)
   end
 

@@ -1,6 +1,6 @@
-require './assignment_2/lib/Generate_Database'
-require './assignment_2/models/Interaction_Network'
-require './assignment_2/dao/GeneDatabase'
+require './lib/Generate_Database'
+require './models/Interaction_Network'
+require './dao/GeneDatabase'
 
 
 puts "\n\n\n\n"
@@ -119,7 +119,7 @@ end
 
 name_file = "Networks_original"
 name_file = "Networks_all_database"
-File.open("assignment_2/outputs/" + name_file +".txt", "w") do |file|
+File.open("outputs/" + name_file +".txt", "w") do |file|
   interaction_network_list = []
   gene_rows_list.each_with_index do |gene, index|
     # Added first Gene Node

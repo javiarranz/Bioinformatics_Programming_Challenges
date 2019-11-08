@@ -1,6 +1,6 @@
-require './assignment_2/lib/SqlLite'
-require './assignment_2/models/Gene'
-require './assignment_2/models/Protein'
+require './lib/SqlLite'
+require './models/Gene'
+require './models/Protein'
 
 # This class contains all the functions that our database can do (add, get_single, get_all, delete..)
 

@@ -4,7 +4,7 @@ class SqlLite
   attr_reader :db
 
   def initialize()
-    @db = SQLite3::Database.open "biology.db"
+    @db = SQLite3::Database.open "./biology.db"
 
   end
 

@@ -1,6 +1,6 @@
-require './assignment_2/dao/GeneDatabase'
-require './assignment_2/models/Gene'
-require './assignment_2/models/Protein'
+require './dao/GeneDatabase'
+require './models/Gene'
+require './models/Protein'
 
 class InteractionNetwork
 
