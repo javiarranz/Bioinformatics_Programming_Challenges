@@ -134,7 +134,6 @@ class Generate_database
       # else
       #   puts "*** Interactions not found for  Gene #{gene.gene_id}"
     end
-    # end
   end
 
 
@@ -176,7 +175,6 @@ class Generate_database
       return gene
     end
     false
-    # end
   end
 
   def create_annotations(gene, protein_name)
@@ -254,8 +252,7 @@ class Generate_database
   end
 
   def check_interaction(interaction, protein_id)
-    # genes_list = @gene_database.get_all_genes_without_linked
-    # if genes_list.length < 290
+
     exceptions = ["MI:0018", "MI:0397"]
     if !exceptions.include? interaction["xref"]["primaryRef"]["refTypeAc"]
       # Remove interactions detected by "two hybrib" and "two hybrid array" (too many false positives)
@@ -282,7 +279,6 @@ class Generate_database
         if conf_value > 0.1
           # Confidence value to only return valuable information (value must be modified)
 
-          # genes_list = @gene_database.get_all_genes_without_linked
           # If protein_1 exists, tell me it's name
           protein_1 = @gene_database.get_protein(protein_name_1)
           # If protein_1 does not exist, go to Togows and look for the name
@@ -310,12 +306,10 @@ class Generate_database
         end
       end
     end
-    # end
   end
 
   def get_protein(protein_name)
-    # genes_list = @gene_database.get_all_genes_without_linked
-    # if genes_list.length < 290
+
     protein = false
     puts "    - Getting Protein New Protein "
     togows_gene_db = @togo_api.get("ebi-uniprot", "#{protein_name}", "gn", "json")
@@ -336,7 +330,6 @@ class Generate_database
 
     end
     protein
-    # end
   end
 end
 
