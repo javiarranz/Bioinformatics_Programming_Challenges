@@ -1,2 +1,2 @@
-ATATTCTTCTTACTGATTAAGAAGTCATCG
-TATAAGAAGAATGACTAATTCTTCAGTAGC
+atattcttcttactgattaagaagtcatcg
+cgatgacttcttaatcagtaagaagaatat

@@ -1,13 +1,38 @@
 require 'rest-client'
-# require 'bio'
-require './lib/rest/EbiDbfetchRestApi'
-require './lib/file_parser'
+require 'bio'
+require './assignment_3/lib/rest/EbiDbfetchRestApi'
+require './assignment_3/lib/file_parser'
 
-@file_name = 'ArabidopsisSubNetwork_GeneList.tsv'
+#@file_name = 'ArabidopsisSubNetwork_GeneList.tsv'
+@file_name = 'ArabidopsisSubNetwork_GeneList_test.tsv'
 @ebi_api = EbiDbfetchRestApi.new
 
+
+puts "ASSIGNMENT 3"
+# ---------------------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------------------#
+# FIST, I CREATE AN OUTPUT WITH A SHORT SEQUENCE TAT CONTAINS CTTCTT IN 5'->3' IN BOTH STRANDS
+# ---------------------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------------------#
+
+seq = Bio::Sequence::NA.new("ATATTCTTCTTACTGATTAAGAAGTCATCG")
+puts seq
+
+name_file = "20_NA_sequence"
+File.open("assignment_3/outputs/" + name_file +".txt", "w") do |file|
+  file.puts seq
+  file.puts seq.complement
+end
+
+
+# ---------------------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------------------#
+# NOW I READ ALL THE GENES FROM THE LIST TO THEN ITERATE THEM TO GET THE SEQUENCES
+# ---------------------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------------------#
+
 def parse_original_file
-  path_fixtures = './fixtures'
+  path_fixtures = './assignment_3/fixtures'
   @arabidopsis_genelist = FileParser.new(path_fixtures, @file_name)
 end
 
@@ -15,32 +40,32 @@ parse_original_file
 gene_rows = @arabidopsis_genelist.rows
 #puts gene_rows
 
+
+# ---------------------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------------------#
+# I USE EBI API ==> TO GET TEH SEQUENCES
+# ---------------------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------------------#
+
 gene_rows.each do |row|
-  puts row['Gene_ID'].upcase
+  gene = row['Gene_ID'].upcase
+  gene_cleaned = gene.gsub("\n","")
+  @ebi_api.get("ensemblgenomesgene", "fasta", gene_cleaned, "raw")
 end
 
-# EBI API ==> TO GET TEH SEQUENCES
-# ----------------------------------
-# gene_rows.each do |row|
-#   ebifetch = @ebi_api.get("ensemblgenomesgene", "fasta", gene.gene_id, "raw")
-#   if ebifetch
-#     puts "Encontrado para #{gene.gene_id}"
-#   # else
-#   #   puts "No Encontrado para #{gene.gene_id}"
-#   end
-# end
 
 
-puts "ASSIGNMENT 3"
+
+
+
+
+
 
 #@gene_database = GeneDatabase.new()
 # generateDatabase = Generate_database.new(true)         # ==> TRUE TO CLEAN and REDO THE DATABASE
 #generateDatabase = Generate_database.new(false)    # ==> FALSE TO NOT CLEAN THE DATABASE (DEFAULT)
 
-# name_file = "20_NA_sequence"
-# File.open("outputs/" + name_file +".txt", "w") do |file|
-#   file.puts "ATATTCTTCTTACTGATCACTGACTAGCTACTTACTGCATTAAGAAGTCATCG"
-#   file.puts "TATAAGAAGAATGACTAGTGACTGATCGATGAATGACGTAATTCTTCAGTAGC"
+#
 #
 # end
 # puts "Finish"
@@ -57,7 +82,7 @@ puts "ASSIGNMENT 3"
 #---------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
+##
 #---------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------#
