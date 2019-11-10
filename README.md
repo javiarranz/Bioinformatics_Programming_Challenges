@@ -30,7 +30,7 @@ On this exercise I have created:
 ###### Development finished on 6 - October - 2019 -  Merged to Develop
 Execute Exercise with:
 ```
-$ ruby ex_2.rb  
+$ ruby assignment_2.rb  
 ```
 On this exercise I have created:
 - A real database using SQLite 
