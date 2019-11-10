@@ -6,6 +6,8 @@ require './assignment_3/lib/file_parser'
 #@file_name = 'ArabidopsisSubNetwork_GeneList.tsv'
 @file_name = 'ArabidopsisSubNetwork_GeneList_test.tsv'
 @ebi_api = EbiDbfetchRestApi.new
+@target = "cttctt"
+@target_length = @target.length
 
 
 puts "ASSIGNMENT 3"
@@ -40,6 +42,12 @@ parse_original_file
 gene_rows = @arabidopsis_genelist.rows
 #puts gene_rows
 
+def new_file(filename)
+  if File.exists?(filename)
+    File.delete(filename) # We remove the file in case it exits to update it
+  end
+  File.open(filename)
+end
 
 # ---------------------------------------------------------------------------------------------------------#
 # ---------------------------------------------------------------------------------------------------------#
@@ -50,7 +58,14 @@ gene_rows = @arabidopsis_genelist.rows
 gene_rows.each do |row|
   gene = row['Gene_ID'].upcase
   gene_cleaned = gene.gsub("\n","")
-  @ebi_api.get("ensemblgenomesgene", "fasta", gene_cleaned, "raw")
+  fasta = @ebi_api.get("ensemblgenomesgene", "fasta", gene_cleaned, "raw")
+  #@ebi_api.get("ensemblgenomesgene", "fasta", gene_cleaned, "raw")
+  entry = Bio::EMBL.new(fasta)
+  entry.to_biosequence
+  bioseq = entry.to_biosequence
+  bioseq
+
+  #seq = Bio::Sequence::NA.new(fasta)
 end
 
 
