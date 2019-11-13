@@ -5,8 +5,8 @@ require './assignment_3/lib/rest/EbiDbfetchRestApi'
 require './assignment_3/lib/file_parser'
 require './assignment_3/models/Gene'
 
-#@file_name = 'ArabidopsisSubNetwork_GeneList.tsv'
-@file_name = 'ArabidopsisSubNetwork_GeneList_test.tsv'
+@file_name = 'ArabidopsisSubNetwork_GeneList.tsv'
+# @file_name = 'ArabidopsisSubNetwork_GeneList_test.tsv'
 @ebi_api = EbiDbfetchRestApi.new
 @target = Bio::Sequence::NA.new("CTTCTT")
 @target_length = @target.length
@@ -69,6 +69,8 @@ def clean_sequence(ebi_api)
   cleaned_sequence
 end
 
+
+
 def get_exons_targets (sequence_bio)
   # Routine that given the Bio:EMBL object returns a hash in which the keys are
   # the coordinates of the target's matches inside exons.
@@ -76,10 +78,11 @@ def get_exons_targets (sequence_bio)
   length = sequence_bio.length() # Length of the nucleotide sequence
   target_positions_in_exon = {} # Hash that will contain the positions targeted inside exons as keys and the strand as values
 
-   target_matches_in_seq_foward = sequence_bio.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
-   target_matches_in_seq_reverse = sequence_bio.complement.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
+   forward = sequence_bio.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
+   reverse = sequence_bio.complement.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
 
   sequence_bio.features.each do |feature|
+    #finds the position of the feature
     position = feature.position
 
     next unless (feature.feature == 'exon' && (not position =~ /[A-Z]/))
@@ -94,20 +97,24 @@ def get_exons_targets (sequence_bio)
         position_reverse.insert(0, length - pos.to_i) # We use insert to give the correct order of the coordinates
       end
 
-      target_pos_in_exon = find_target_in_exon(exon_id, target_matches_in_seq_reverse, length, position_reverse, '-')
+      target_pos_in_exon = find_target_in_exons_test(exon_id, reverse, length, position_reverse, '-')
       # We call "find_target_in_exon" to determine which matches are inside of the exon.
       # Here, we pass to the function the matches and the positions of the exon both in the reverse strand
       if not target_pos_in_exon.nil? # If we retrieve a response, we add the targets to the hash
-        target_positions_in_exon = target_positions_in_exon.merge(target_pos_in_exon)
+        target_positions_in_exon = []
+        target_positions_in_exon = target_positions_in_exon.push(target_pos_in_exon)
       end
 
     else # Exon is in foward strand ---> (+)
       position = position.split('..') # Getting a 2 elements array containg initial and end position
-      target_pos_in_exon = find_target_in_exon(exon_id, target_matches_in_seq_foward, length, position, '+')
+      # position = position.map(&:to_i)  #Transform string into integer
+      #
+      target_pos_in_exon = find_target_in_exons_test(exon_id, forward, length, position, '+')
       # We call "find_target_in_exon" to determine which matches are inside of the exon.
       # Here, we pass to the function the matches and the positions of the exon both in the foward strand
       if not target_pos_in_exon.nil? # If we retrieve a response, we add the targets to the hash
-        target_positions_in_exon = target_positions_in_exon.merge(target_pos_in_exon)
+        target_positions_in_exon = []
+        target_positions_in_exon = target_positions_in_exon.push(target_pos_in_exon)
       end
 
     end
@@ -115,17 +122,43 @@ def get_exons_targets (sequence_bio)
 
   end
 
-  return target_positions_in_exon
+  return target_positions_in_exon[0]
   # We return the hash
 
 end
 
-def find_target_in_exons(exon_id, target_sequence_matches, len_seq, exon_position, strand)
+# def find_target_in_exons(exon_id, target_sequence_matches, len_seq, exon_position, strand)
+#   target = {}
+#
+#   case strand # We will check if we are working will the foward or reverse strand
+#   when '+' # Foward
+#     target_sequence_matches.each do |match_init|
+#       match_end = match_init + @target_length - 1
+#       if (match_init >= exon_position[0].to_i) && (match_init <= exon_position[1].to_i) && (match_end >= exon_position[0].to_i) && (match_end <= exon_position[1].to_i)
+#         # The condition is established to see whether the target is inside the exon
+#         target[[match_init, match_end]] = [exon_id, '+']
+#       end
+#     end
+#
+#   when '-' # Reverse
+#     target_sequence_matches.each do |match_init|
+#       match_end = match_init + @len_target - 1
+#       if (match_init >= exon_position[0].to_i) && (match_init <= exon_position[1].to_i) && (match_end >= exon_position[0].to_i) && (match_end <= exon_position[1].to_i)
+#         # The condition is established to see whether the target is inside the exon
+#         # To work will the hipotetical positions that correspond to the foward strand, we need to convert the positions as follows
+#         m_end = len_seq - match_end
+#         m_init = len_seq - match_init
+#         target[[m_end, m_init]] = [exon_id, '-']
+#       end
+#     end
+#   else
+#     puts "unknown strand"
+#   end
+# end
+def find_target_in_exons_test(exon_id, target_sequence_matches, len_seq, exon_position, strand)
   target = {}
-
-  case strand # We will check if we are working will the foward or reverse strand
-
-  when '+' # Foward
+# We will check if we are working will the foward or reverse strand
+  if strand == '+'    # Foward
     target_sequence_matches.each do |match_init|
       match_end = match_init + @target_length - 1
       if (match_init >= exon_position[0].to_i) && (match_init <= exon_position[1].to_i) && (match_end >= exon_position[0].to_i) && (match_end <= exon_position[1].to_i)
@@ -133,20 +166,19 @@ def find_target_in_exons(exon_id, target_sequence_matches, len_seq, exon_positio
         target[[match_init, match_end]] = [exon_id, '+']
       end
     end
-
-  when '-' # Reverse
+  elsif strand == '-' # Reverse
     target_sequence_matches.each do |match_init|
-      match_end = match_init + @len_target - 1
+      match_end = match_init + @target_length - 1
       if (match_init >= exon_position[0].to_i) && (match_init <= exon_position[1].to_i) && (match_end >= exon_position[0].to_i) && (match_end <= exon_position[1].to_i)
         # The condition is established to see whether the target is inside the exon
         # To work will the hipotetical positions that correspond to the foward strand, we need to convert the positions as follows
         m_end = len_seq - match_end
         m_init = len_seq - match_init
         target[[m_end, m_init]] = [exon_id, '-']
-
       end
-
     end
+  else
+    puts "unknown strand"
   end
 end
 
@@ -263,10 +295,10 @@ gene_rows.each do |row|
     target_hash = get_exons_targets(sequence)
     if target_hash.empty?
       @no_targets.push(gene_cleaned)
-    else
-      add_features(gene, target_hash, sequence) # We create new features and add them to each seq_obj
-      chr = get_chromosome(gene, sequence) # We return the chromosome number and postions
-      convert_to_chr(gene, target_hash, chr) # We convert the positions to the ones that correspond in the chromosome
+    # else
+    #   add_features(gene, target_hash, sequence) # We create new features and add them to each seq_obj
+    #   chr = get_chromosome(gene, sequence) # We return the chromosome number and postions
+    #   convert_to_chr(gene, target_hash, chr) # We convert the positions to the ones that correspond in the chromosome
     end
   end
 end
@@ -296,27 +328,90 @@ puts @no_targets.length
 #FORMA DE HACERLO DEL PROFESOR
 #
 
+# # Create a Bio::Feature object.
+# # For example: the GenBank-formatted entry in genbank for accession M33388
+# # contains the following feature:
+# #    exon     1532..1799
+# #             /gene="CYP2D6"
+# #             /note="cytochrome P450 IID6; GOO-132-127"
+# #             /number="1"
+# feature = Bio::Feature.new('exon','1532..1799')
+# feature.append(Bio::Feature::Qualifier.new('gene', 'CYP2D6'))
+# feature.append(Bio::Feature::Qualifier.new('note', 'cytochrome P450 IID6'))
+# feature.append(Bio::Feature::Qualifier.new('number', '1'))
 #
-# genes = File.open('./files/short_gene_list.txt', 'r')
-# fastaoutput = File.open('./files/ARA.fa', 'w')
+# # or all in one go:
+# feature2 = Bio::Feature.new('exon','1532..1799',
+#                             [ Bio::Feature::Qualifier.new('gene', 'CYP2D6'),
+#                               Bio::Feature::Qualifier.new('note', 'cytochrome P450 IID6; GOO-132-127'),
+#                               Bio::Feature::Qualifier.new('number', '1')
+#                             ])
 #
-# genearray = genes.read.split()
-# geneids=genearray.join(",")
-#
-# url = "http://www.ebi.ac.uk/Tools/dbfetch/dbfetch?db=ensemblgenomesgene&format=fasta&id=#{geneids}"
-#
-# puts url
-# res = fetch(url)
-# puts res.body
-# fastaoutput.write(res.body)
-#
-# genes.close
-# fastaoutput.close
-#
-#
-# puts "done - now check your fasta output in /UPM_BioinfoCourse/Lectures/files/ARA.fa"
+# # Print the feature
+# puts feature.feature + "\t" + feature.position
+# feature.each do |qualifier|
+#   puts "- " + qualifier.qualifier + ": " + qualifier.value
+# end
 
 
+
+
+
+
+
+#CREATING NEW FEATURES
+#
+#
+#
+#
+#
+#
+# require 'bio'
+#
+# datafile2 = Bio::FlatFile.auto('At3g54340.embl')
+# entry =  datafile2.next_entry   # this is a way to get just one entry from the FlatFile
+# puts "\n\nconverting it to a Bio::Sequence"
+# bioseq = entry.to_biosequence  # this is how you convert a database entry to a Bio::Sequence
+# puts "This entry has: #{bioseq.features.length} features at the beginning"
+#
+#
+# f1 = Bio::Feature.new('myrepeat','120..124')
+# f1.append(Bio::Feature::Qualifier.new('repeat_motif', 'AAGCC'))
+# f1.append(Bio::Feature::Qualifier.new('note', 'found by repeatfinder 2.0'))
+# f1.append(Bio::Feature::Qualifier.new('strand', '+'))
+# bioseq.features << f1  # you can append features one-by-one, using the << operator of Ruby arrays
+#
+# f2 = Bio::Feature.new('myrepeat','complement(190..194)')   # NOTE THE FORMAT HERE!  See note in RED above!!!!!!!!!!
+# f2.append(Bio::Feature::Qualifier.new('repeat_motif', 'AAGCC'))
+# f2.append(Bio::Feature::Qualifier.new('note', 'found by repeatfinder 2.0'))
+# f2.append(Bio::Feature::Qualifier.new('strand', '-'))
+# bioseq.features << f2
+#
+#
+# puts "This entry has: #{bioseq.features.length} features afer appending two individual features"
+#
+# bioseq.features.concat([ f1, f2 ])   # or you can take an array of features and concatenate with the .features array
+#
+# puts "This entry has: #{bioseq.features.length} features after concatenating a list of two new features"
+#
+#   bioseq.features.each do |feature|
+#     featuretype = feature.feature
+#     next unless featuretype == "myrepeat"
+#     position = feature.position
+#     puts "\n\n\n\nFEATURE #{featuretype} @ POSITION = #{position}"
+#     qual = feature.assoc            # feature.assoc gives you a hash of Bio::Feature::Qualifier objects
+#                                     # i.e. qualifier['key'] = value  for example qualifier['gene'] = "CYP450")
+#     puts "Associations = #{qual}"
+#     # skips the entry if "/translation=" is not found
+#   end
+#
+# puts "\n\n\ndone"
+#
+#
+#
+#
+#
+#
 #---------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------#

@@ -17,7 +17,7 @@ class EbiDbfetchRestApi
       check_response(response)
       #puts response
       body = response.body
-      puts body
+      #puts body
     rescue RestClient::ExceptionWithResponse => e
       $stderr.puts e.response
     rescue RestClient::Exception => e
