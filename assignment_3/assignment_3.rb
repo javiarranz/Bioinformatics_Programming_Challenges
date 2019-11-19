@@ -15,56 +15,31 @@ require './assignment_3/models/Gene'
 @gff_chr = []
 @no_targets = []
 
-puts "ASSIGNMENT 3"
-
-# ---------------------------------------------------------------------------------------------------------#
-# ---------------------------------------------------------------------------------------------------------#
-# FIST, I CREATE AN OUTPUT WITH A SHORT SEQUENCE TAT CONTAINS CTTCTT IN 5'->3' IN BOTH STRANDS
-# ---------------------------------------------------------------------------------------------------------#
-# ---------------------------------------------------------------------------------------------------------#
-
-seq = Bio::Sequence::NA.new("ATATTCTTCTTACTGATTAAGAAGTCATCG")
-puts seq
-
-name_file = "20_NA_sequence"
-File.open("assignment_3/outputs/" + name_file + ".txt", "w") do |file|
-  file.puts seq
-  file.puts seq.complement
-end
-
-
-# ---------------------------------------------------------------------------------------------------------#
-# ---------------------------------------------------------------------------------------------------------#
-# NOW I READ ALL THE GENES FROM THE LIST TO THEN SAVE THEM IN THE CLASS GENE
-# ---------------------------------------------------------------------------------------------------------#
-# ---------------------------------------------------------------------------------------------------------#
 
 def parse_original_file
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
+  # NOW I READ ALL THE GENES FROM THE LIST TO THEN SAVE THEM IN THE CLASS GENE
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
+
   path_fixtures = './assignment_3/fixtures'
   @arabidopsis_genelist = FileParser.new(path_fixtures, @file_name)
 end
 
-parse_original_file
-gene_rows = @arabidopsis_genelist.rows
-
-gene_rows.each do |row|
-  Gene.new(row['Gene_ID'])
-end
-
-
-def get_gene_fasta(gene)
-  ebi_api = @ebi_api.get("ensemblgenomesgene", "embl", gene, false)
+def get_gene_fasta(gene_id)
+  ebi_api = @ebi_api.get("ensemblgenomesgene", "embl", gene_id, false)
 
   # cleaned_sequence = clean_sequence(ebi_api)
   # for fasta files to create a Bio::Sequence:NA.new(ebi_api)
 
   if ebi_api
-    puts "*** Getting fasta sequence for Gene #{gene}"
+    puts "*** Getting fasta sequence for Gene #{gene_id}"
     entry = Bio::EMBL.new(ebi_api)
     # entry = Bio::Sequence::NA.new(cleaned_sequence)
-    bioseq = entry.to_biosequence
+    return entry.to_biosequence
   end
-  bioseq
+  nil
 end
 
 def clean_sequence(ebi_api)
@@ -78,16 +53,16 @@ def clean_sequence(ebi_api)
   cleaned_sequence
 end
 
-def get_exons_targets (sequence_bio)
+def get_exons_targets(sequence_bio)
   puts "\t\t ** Finding exons.."
   # Routine that given the Bio:EMBL object returns a hash in which the keys are
   # the coordinates of the target's matches inside exons.
 
   length = sequence_bio.length() # Length of the nucleotide sequence
-  target_positions_in_exon = {} # Hash that will contain the positions targeted inside exons as keys and the strand as values
+  target_hash_positions_in_exon = {} # Hash that will contain the positions targeted inside exons as keys and the strand as values
 
-   forward = sequence_bio.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
-   reverse = sequence_bio.complement.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
+  forward = sequence_bio.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
+  reverse = sequence_bio.complement.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
 
   sequence_bio.features.each do |feature|
     #finds the position of the feature
@@ -96,7 +71,6 @@ def get_exons_targets (sequence_bio)
     next unless (feature.feature == 'exon' && (not position =~ /[A-Z]/))
     # We look for the feature type "exon" and we ommit tras-splicing
     exon_id = feature.qualifiers[0].value.gsub('exon_id=', '') # We format the string
-
     if position =~ /complement/ # Exon is in reverse strand ---> (-)
       position = position.tr('complement()', '').split('..')
       position_reverse = []
@@ -109,9 +83,8 @@ def get_exons_targets (sequence_bio)
       # We call "find_target_in_exon" to determine which matches are inside of the exon.
       # Here, we pass to the function the matches and the positions of the exon both in the reverse strand
       if not target_pos_in_exon.nil? # If we retrieve a response, we add the targets to the hash
-        target_positions_in_exon = target_positions_in_exon.merge(target_pos_in_exon)
+        target_hash_positions_in_exon = target_hash_positions_in_exon.merge(target_pos_in_exon)
       end
-
     else # Exon is in foward strand ---> (+)
       position = position.split('..') # Getting a 2 elements array containg initial and end position
       # position = position.map(&:to_i)  #Transform string into integer
@@ -120,24 +93,20 @@ def get_exons_targets (sequence_bio)
       # We call "find_target_in_exon" to determine which matches are inside of the exon.
       # Here, we pass to the function the matches and the positions of the exon both in the foward strand
       if not target_pos_in_exon.nil? # If we retrieve a response, we add the targets to the hash
-        target_positions_in_exon = target_positions_in_exon.merge(target_pos_in_exon)
+        target_hash_positions_in_exon = target_hash_positions_in_exon.merge(target_pos_in_exon)
       end
 
     end
-
-
   end
 
-  return target_positions_in_exon
-  # We return the hash
-
+  target_hash_positions_in_exon # We return the hash
 end
 
 def find_target_in_exons(exon_id, target_sequence_matches, len_seq, exon_position, strand)
   target = Hash.new
   puts "\t\t\t\t - finding the the CTTCTT sequence.."
 # We will check if we are working will the foward or reverse strand
-  if strand == '+'    # Foward
+  if strand == '+' # Foward
     target_sequence_matches.each do |match_init|
       match_end = match_init + @target_length - 1
       if (match_init >= exon_position[0].to_i) && (match_init <= exon_position[1].to_i) && (match_end >= exon_position[0].to_i) && (match_end <= exon_position[1].to_i)
@@ -162,11 +131,13 @@ def find_target_in_exons(exon_id, target_sequence_matches, len_seq, exon_positio
   return target
 end
 
-def new_file(filename)
-  if File.exists?(filename)
-    File.delete(filename) # We remove the file in case it exits to update it
+def new_file(name_file, items_list)
+  File.open("./assignment_3/outputs/" + name_file + ".gff3", "w") do |file|
+    file.puts "These are the #{@gff_chr.length} chromosomes"
+    items_list.each do |chromosome|
+      file.puts chromosome
+    end
   end
-  File.open(filename)
 end
 
 def get_chromosome (gene_id, sequence)
@@ -221,194 +192,181 @@ def convert_to_chr(gene, targets, chromosome)
   # Given the gene ID, the hash containing the targets, and the information
   # about the chromosome, this method translates the coordinates to the ones
   # refering to the chromosome. It prints them on the GFF3 chromosome file
-
-
   targets.each do |positions, exon_strand|
     pos_ini_chr = chromosome[1].to_i + positions[0].to_i
     pos_end_chr = chromosome[1].to_i + positions[1].to_i
-
     @gff_chr.push "#{chromosome[0]}\t.\tNA_motif\t#{pos_ini_chr}\t#{pos_end_chr}\t.\t#{exon_strand[1]}\t.\tID=#{exon_strand[0]};parent=#{gene}"
   end
-
-
 end
 
+def init_assingment()
+  puts "ASSIGNMENT 3"
+
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
+  # FIRST, I CREATE AN OUTPUT WITH A SHORT SEQUENCE TAT CONTAINS CTTCTT IN 5'->3' IN BOTH STRANDS
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
+
+  seq = Bio::Sequence::NA.new("ATATTCTTCTTACTGATTAAGAAGTCATCG")
+  puts seq
+
+  name_file = "20_NA_sequence"
+  File.open("assignment_3/outputs/" + name_file + ".txt", "w") do |file|
+    file.puts seq
+    file.puts seq.complement
+  end
 
 
+  parse_original_file
+  gene_rows = @arabidopsis_genelist.rows
 
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
+  # I USE EBI API ==> TO GET TEH SEQUENCES
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
 
-# ---------------------------------------------------------------------------------------------------------#
-# ---------------------------------------------------------------------------------------------------------#
-# I USE EBI API ==> TO GET TEH SEQUENCES
-# ---------------------------------------------------------------------------------------------------------#
-# ---------------------------------------------------------------------------------------------------------#
-
-
-gene_rows.each do |row|
-  gene = row['Gene_ID'].upcase
-  gene = gene.gsub("\n", "")
-  sequence = get_gene_fasta(gene)
-  #sequence.output
-  unless sequence == nil
-    #TODO START FROM HERE
-    target_hash = get_exons_targets(sequence)
-    if target_hash.empty?
-      @no_targets.push(gene)
-    else
-      add_features(gene, target_hash, sequence) # We create new features and add them to each seq_obj
-      chr = get_chromosome(gene, sequence) # We return the chromosome number and postions
-      convert_to_chr(gene, target_hash, chr) # We convert the positions to the ones that correspond in the chromosome
+  gene_rows.each do |row|
+    gene = Gene.new(row['Gene_ID'])
+    sequence = get_gene_fasta(gene.gene_id)
+    #sequence.output
+    unless sequence == nil
+      target_hash = get_exons_targets(sequence)
+      if target_hash.empty?
+        @no_targets.push(gene.gene_id)
+      else
+        add_features(gene.gene_id, target_hash, sequence) # We create new features and add them to each seq_obj
+        chr = get_chromosome(gene.gene_id, sequence) # We return the chromosome number and postions
+        convert_to_chr(gene.gene_id, target_hash, chr) # We convert the positions to the ones that correspond in the chromosome
+      end
     end
   end
+
+
+  #Lets create an output with the GENES that didn't have the target sequence as a record
+  new_file("Genes_no_targets", @no_targets)
+  new_file("Genes_targets", @gff_genes)
+  new_file("Genes_chromosomes", @gff_chr)
+
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #FORMA DE HACERLO DEL PROFESOR
+  #
+
+  # # Create a Bio::Feature object.
+  # # For example: the GenBank-formatted entry in genbank for accession M33388
+  # # contains the following feature:
+  # #    exon     1532..1799
+  # #             /gene="CYP2D6"
+  # #             /note="cytochrome P450 IID6; GOO-132-127"
+  # #             /number="1"
+  # feature = Bio::Feature.new('exon','1532..1799')
+  # feature.append(Bio::Feature::Qualifier.new('gene', 'CYP2D6'))
+  # feature.append(Bio::Feature::Qualifier.new('note', 'cytochrome P450 IID6'))
+  # feature.append(Bio::Feature::Qualifier.new('number', '1'))
+  #
+  # # or all in one go:
+  # feature2 = Bio::Feature.new('exon','1532..1799',
+  #                             [ Bio::Feature::Qualifier.new('gene', 'CYP2D6'),
+  #                               Bio::Feature::Qualifier.new('note', 'cytochrome P450 IID6; GOO-132-127'),
+  #                               Bio::Feature::Qualifier.new('number', '1')
+  #                             ])
+  #
+  # # Print the feature
+  # puts feature.feature + "\t" + feature.position
+  # feature.each do |qualifier|
+  #   puts "- " + qualifier.qualifier + ": " + qualifier.value
+  # end
+
+
+  #CREATING NEW FEATURES
+  #
+  #
+  #
+  #
+  #
+  #
+  # require 'bio'
+  #
+  # datafile2 = Bio::FlatFile.auto('At3g54340.embl')
+  # entry =  datafile2.next_entry   # this is a way to get just one entry from the FlatFile
+  # puts "\n\nconverting it to a Bio::Sequence"
+  # bioseq = entry.to_biosequence  # this is how you convert a database entry to a Bio::Sequence
+  # puts "This entry has: #{bioseq.features.length} features at the beginning"
+  #
+  #
+  # f1 = Bio::Feature.new('myrepeat','120..124')
+  # f1.append(Bio::Feature::Qualifier.new('repeat_motif', 'AAGCC'))
+  # f1.append(Bio::Feature::Qualifier.new('note', 'found by repeatfinder 2.0'))
+  # f1.append(Bio::Feature::Qualifier.new('strand', '+'))
+  # bioseq.features << f1  # you can append features one-by-one, using the << operator of Ruby arrays
+  #
+  # f2 = Bio::Feature.new('myrepeat','complement(190..194)')   # NOTE THE FORMAT HERE!  See note in RED above!!!!!!!!!!
+  # f2.append(Bio::Feature::Qualifier.new('repeat_motif', 'AAGCC'))
+  # f2.append(Bio::Feature::Qualifier.new('note', 'found by repeatfinder 2.0'))
+  # f2.append(Bio::Feature::Qualifier.new('strand', '-'))
+  # bioseq.features << f2
+  #
+  #
+  # puts "This entry has: #{bioseq.features.length} features afer appending two individual features"
+  #
+  # bioseq.features.concat([ f1, f2 ])   # or you can take an array of features and concatenate with the .features array
+  #
+  # puts "This entry has: #{bioseq.features.length} features after concatenating a list of two new features"
+  #
+  #   bioseq.features.each do |feature|
+  #     featuretype = feature.feature
+  #     next unless featuretype == "myrepeat"
+  #     position = feature.position
+  #     puts "\n\n\n\nFEATURE #{featuretype} @ POSITION = #{position}"
+  #     qual = feature.assoc            # feature.assoc gives you a hash of Bio::Feature::Qualifier objects
+  #                                     # i.e. qualifier['key'] = value  for example qualifier['gene'] = "CYP450")
+  #     puts "Associations = #{qual}"
+  #     # skips the entry if "/translation=" is not found
+  #   end
+  #
+  # puts "\n\n\ndone"
+  #
+  #
+  #
+  #
+  #
+  #
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------#
 end
 
-
-#Lets create an output with the GENES that didn't have the target sequence as a record
-name_file = "Genes_no_targets"
-File.open("./assignment_3/outputs/" + name_file +".txt", "w") do |file|
-  file.puts "There are #{@no_targets.length} genes that does not have the target sequence"
-  @no_targets.each do |gene|
-    file.puts gene
-  end
-end
-
-name_file = "Genes_targets"
-File.open("./assignment_3/outputs/" + name_file +".gff3", "w") do |file|
-  file.puts "There are #{@gff_genes.length} genes with the CTTCTT target sequence"
-  @gff_genes.each do |gene|
-    file.puts gene
-  end
-end
-
-name_file = "Genes_chromosomes"
-File.open("./assignment_3/outputs/" + name_file +".gff3", "w") do |file|
-  file.puts "These are the #{@gff_chr.length} chromosomes"
-  @gff_chr.each do |chromosome|
-    file.puts chromosome
-  end
-end
-
-
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#FORMA DE HACERLO DEL PROFESOR
-#
-
-# # Create a Bio::Feature object.
-# # For example: the GenBank-formatted entry in genbank for accession M33388
-# # contains the following feature:
-# #    exon     1532..1799
-# #             /gene="CYP2D6"
-# #             /note="cytochrome P450 IID6; GOO-132-127"
-# #             /number="1"
-# feature = Bio::Feature.new('exon','1532..1799')
-# feature.append(Bio::Feature::Qualifier.new('gene', 'CYP2D6'))
-# feature.append(Bio::Feature::Qualifier.new('note', 'cytochrome P450 IID6'))
-# feature.append(Bio::Feature::Qualifier.new('number', '1'))
-#
-# # or all in one go:
-# feature2 = Bio::Feature.new('exon','1532..1799',
-#                             [ Bio::Feature::Qualifier.new('gene', 'CYP2D6'),
-#                               Bio::Feature::Qualifier.new('note', 'cytochrome P450 IID6; GOO-132-127'),
-#                               Bio::Feature::Qualifier.new('number', '1')
-#                             ])
-#
-# # Print the feature
-# puts feature.feature + "\t" + feature.position
-# feature.each do |qualifier|
-#   puts "- " + qualifier.qualifier + ": " + qualifier.value
-# end
-
-
-
-
-
-
-
-#CREATING NEW FEATURES
-#
-#
-#
-#
-#
-#
-# require 'bio'
-#
-# datafile2 = Bio::FlatFile.auto('At3g54340.embl')
-# entry =  datafile2.next_entry   # this is a way to get just one entry from the FlatFile
-# puts "\n\nconverting it to a Bio::Sequence"
-# bioseq = entry.to_biosequence  # this is how you convert a database entry to a Bio::Sequence
-# puts "This entry has: #{bioseq.features.length} features at the beginning"
-#
-#
-# f1 = Bio::Feature.new('myrepeat','120..124')
-# f1.append(Bio::Feature::Qualifier.new('repeat_motif', 'AAGCC'))
-# f1.append(Bio::Feature::Qualifier.new('note', 'found by repeatfinder 2.0'))
-# f1.append(Bio::Feature::Qualifier.new('strand', '+'))
-# bioseq.features << f1  # you can append features one-by-one, using the << operator of Ruby arrays
-#
-# f2 = Bio::Feature.new('myrepeat','complement(190..194)')   # NOTE THE FORMAT HERE!  See note in RED above!!!!!!!!!!
-# f2.append(Bio::Feature::Qualifier.new('repeat_motif', 'AAGCC'))
-# f2.append(Bio::Feature::Qualifier.new('note', 'found by repeatfinder 2.0'))
-# f2.append(Bio::Feature::Qualifier.new('strand', '-'))
-# bioseq.features << f2
-#
-#
-# puts "This entry has: #{bioseq.features.length} features afer appending two individual features"
-#
-# bioseq.features.concat([ f1, f2 ])   # or you can take an array of features and concatenate with the .features array
-#
-# puts "This entry has: #{bioseq.features.length} features after concatenating a list of two new features"
-#
-#   bioseq.features.each do |feature|
-#     featuretype = feature.feature
-#     next unless featuretype == "myrepeat"
-#     position = feature.position
-#     puts "\n\n\n\nFEATURE #{featuretype} @ POSITION = #{position}"
-#     qual = feature.assoc            # feature.assoc gives you a hash of Bio::Feature::Qualifier objects
-#                                     # i.e. qualifier['key'] = value  for example qualifier['gene'] = "CYP450")
-#     puts "Associations = #{qual}"
-#     # skips the entry if "/translation=" is not found
-#   end
-#
-# puts "\n\n\ndone"
-#
-#
-#
-#
-#
-#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------#
+init_assingment

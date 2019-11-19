@@ -157,3 +157,4 @@ File.open("outputs/" + name_file +".txt", "w") do |file|
 end
 
 puts "Finish"
+
