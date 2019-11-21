@@ -1,4 +1,4 @@
-There are 49 genes that does not have the target sequence
+##gff-version 3
 AT4G27030
 AT2G13360
 AT3G28270

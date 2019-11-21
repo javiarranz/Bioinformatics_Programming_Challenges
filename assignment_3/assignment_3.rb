@@ -54,7 +54,7 @@ def clean_sequence(ebi_api)
 end
 
 def get_exons_targets(sequence_bio)
-  puts "\t\t ** Finding exons.."
+  puts "\t ** Finding exons.."
   # Routine that given the Bio:EMBL object returns a hash in which the keys are
   # the coordinates of the target's matches inside exons.
 
@@ -63,11 +63,10 @@ def get_exons_targets(sequence_bio)
 
   forward = sequence_bio.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
   reverse = sequence_bio.complement.gsub(/#{@target}/).map { Regexp.last_match.begin(0) }
-
+  puts "\t\t * Finding the CTTCTT sequence.."
   sequence_bio.features.each do |feature|
     #finds the position of the feature
     position = feature.position
-
     next unless (feature.feature == 'exon' && (not position =~ /[A-Z]/))
     # We look for the feature type "exon" and we ommit tras-splicing
     exon_id = feature.qualifiers[0].value.gsub('exon_id=', '') # We format the string
@@ -88,7 +87,6 @@ def get_exons_targets(sequence_bio)
     else # Exon is in foward strand ---> (+)
       position = position.split('..') # Getting a 2 elements array containg initial and end position
       # position = position.map(&:to_i)  #Transform string into integer
-      #
       target_pos_in_exon = find_target_in_exons(exon_id, forward, length, position, '+')
       # We call "find_target_in_exon" to determine which matches are inside of the exon.
       # Here, we pass to the function the matches and the positions of the exon both in the foward strand
@@ -104,7 +102,6 @@ end
 
 def find_target_in_exons(exon_id, target_sequence_matches, len_seq, exon_position, strand)
   target = Hash.new
-  puts "\t\t\t\t - finding the the CTTCTT sequence.."
 # We will check if we are working will the foward or reverse strand
   if strand == '+' # Foward
     target_sequence_matches.each do |match_init|
@@ -131,37 +128,10 @@ def find_target_in_exons(exon_id, target_sequence_matches, len_seq, exon_positio
   return target
 end
 
-def new_file(name_file, items_list)
-  File.open("./assignment_3/outputs/" + name_file + ".gff3", "w") do |file|
-    file.puts "These are the #{@gff_chr.length} chromosomes"
-    items_list.each do |chromosome|
-      file.puts chromosome
-    end
-  end
-end
-
-def get_chromosome (gene_id, sequence)
-  # Here we want to find the chromosome and the position of a sequence given in the input
-
-  bs_pa = sequence.primary_accession
-  return false unless bs_pa
-
-  chrom_array = bs_pa.split(":")
-  @gff_chr.push "#{chrom_array[2]}\t.\tgene\t#{chrom_array[3]}\t#{chrom_array[4]}\t.\t+\t.\tID=#{gene_id}"
-  # Here I'm pushing this new value to the array of gff_chr that later will be printed in a new file
-
-  # We return:
-  #   - Chromosome number ---> [2]
-  #   - Chromosome gene start position ---> [3]
-  #   - Chromosome gene end position ---> [4]
-  return chrom_array[2], chrom_array[3], chrom_array[4]
-
-end
-
 def add_features(gene_id, targets, bioseq)
   # Method that iterates over the hash with the target's matched in exons
   # to add them as new features to the Bio:EMBL objects.
-
+  puts "\t\t\t\t - Adding new features and qualifiers"
   exon_features = []
 
   targets.each do |target, exonid_strand|
@@ -188,14 +158,50 @@ def add_features(gene_id, targets, bioseq)
 
 end
 
+def get_chromosome (gene_id, sequence)
+  # Here we want to find the chromosome and the position of a sequence given in the input
+  puts "\t\t\t\t - Getting the positions of the chromosomes"
+  sequence_pa = sequence.primary_accession
+  return false unless sequence_pa
+
+  pa_array = sequence_pa.split(":")
+  # In this array we have:
+  #   [0] => chromosome
+  #   [1] => TAIR (arabidopsis thaliana)
+  #   [2] => Chromosome number
+  #   [3] => chromosome gene start position
+  #   [4] => Chromosome gene end position
+  #   [5] => single number (don't know what it is)
+
+  # Lets put an example of the first gene that it finds:
+  #   - [chromosome]  [TAIR10]  [5] [22038165]  [22039568]  [1]
+
+
+  @gff_chr.push "#{pa_array[2]}\t.\tgene\t#{pa_array[3]}\t#{pa_array[4]}\t.\t+\t.\tID=#{gene_id}"
+  # Here I'm pushing this new value to the array of gff_chr that later will be printed in a new file
+  # And I return: [2][3][4]
+  return pa_array[2], pa_array[3], pa_array[4]
+
+end
+
 def convert_to_chr(gene, targets, chromosome)
-  # Given the gene ID, the hash containing the targets, and the information
-  # about the chromosome, this method translates the coordinates to the ones
-  # refering to the chromosome. It prints them on the GFF3 chromosome file
+  # With the gene ID, the hash containing the targets, and the information about the chromosome,
+  # I translate the coordinates to the ones refering to the chromosome.
+  # Then I push it to the array gff_chr
+
   targets.each do |positions, exon_strand|
     pos_ini_chr = chromosome[1].to_i + positions[0].to_i
     pos_end_chr = chromosome[1].to_i + positions[1].to_i
     @gff_chr.push "#{chromosome[0]}\t.\tNA_motif\t#{pos_ini_chr}\t#{pos_end_chr}\t.\t#{exon_strand[1]}\t.\tID=#{exon_strand[0]};parent=#{gene}"
+  end
+end
+
+def new_file(name_file, items_list, format)
+  File.open("./assignment_3/outputs/" + name_file + format, "w") do |file|
+    file.puts "##gff-version 3"
+    items_list.each do |chromosome|
+      file.puts chromosome
+    end
   end
 end
 
@@ -243,11 +249,25 @@ def init_assingment()
     end
   end
 
-
+  puts "\n\n\n\n"
+  puts "##################################"
+  puts "####                          ####"
+  puts "####   CREATING GFF3 FILES    ####"
+  puts "####                          ####"
+  puts "##################################"
+  puts "\n\n"
   #Lets create an output with the GENES that didn't have the target sequence as a record
-  new_file("Genes_no_targets", @no_targets)
-  new_file("Genes_targets", @gff_genes)
-  new_file("Genes_chromosomes", @gff_chr)
+  new_file("Genes_no_targets", @no_targets, ".txt")
+  new_file("Genes_targets", @gff_genes, ".gff3")
+  new_file("Genes_chromosomes", @gff_chr, ".gff3")
+
+  puts "RESULTS: ________________________________________"
+  puts "There are #{@no_targets.length} genes that does not have the target sequence"
+  puts "There are #{gene_rows.length - @no_targets.length} genes that have the target sequence "
+
+  puts "The CTTCTT sequence has been targeted in exons #{@gff_genes.length} times"
+  puts "There are #{gene_rows.length - @no_targets.length} genes with #{@gff_chr.length - (gene_rows.length - @no_targets.length)} NA_motif in Genes_chromosomes.gff3"
+
 
   #---------------------------------------------------------------------------------------------------------#
   #---------------------------------------------------------------------------------------------------------#
