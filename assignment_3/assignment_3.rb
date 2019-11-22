@@ -1,9 +1,9 @@
 require 'rest-client'
 require 'bio'
 require 'net/http'
-require './assignment_3/lib/rest/EbiDbfetchRestApi'
-require './assignment_3/lib/file_parser'
-require './assignment_3/models/Gene'
+require './lib/rest/EbiDbfetchRestApi'
+require './lib/file_parser'
+require './models/Gene'
 
 @file_name = 'ArabidopsisSubNetwork_GeneList.tsv'
 #@file_name = 'ArabidopsisSubNetwork_GeneList_test.tsv'
@@ -23,7 +23,7 @@ def parse_original_file
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
 
-  path_fixtures = './assignment_3/fixtures'
+  path_fixtures = './fixtures'
   @arabidopsis_genelist = FileParser.new(path_fixtures, @file_name)
 end
 
@@ -189,7 +189,7 @@ def get_chr_coordinates(gene, targets, chromosome)
 end
 
 def new_file(name_file, items_list, format)
-  File.open("./assignment_3/outputs/" + name_file + format, "w") do |file|
+  File.open("./outputs/" + name_file + format, "w") do |file|
     file.puts "##gff-version 3"
     items_list.each do |chromosome|
       file.puts chromosome
@@ -210,7 +210,7 @@ def init_assingment()
   puts seq
 
   name_file = "20_NA_sequence"
-  File.open("assignment_3/outputs/" + name_file + ".txt", "w") do |file|
+  File.open("outputs/" + name_file + ".txt", "w") do |file|
     file.puts seq
     file.puts seq.complement
   end
