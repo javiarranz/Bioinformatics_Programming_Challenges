@@ -135,27 +135,19 @@ def add_features(gene_id, targets, bioseq)
   exon_features = []
 
   targets.each do |target, exonid_strand|
+    feat = Bio::Feature.new("target_#{@target}_exon", "#{target[0]}..#{target[1]}")
+    # Here I add the new Features nucleotide motif and strand
 
-    feat = Bio::Feature.new("target_#{@target.upcase}_exon", "#{target[0]}..#{target[1]}")
-
-    feat.append(Bio::Feature::Qualifier.new('NA_motif', "#{@target.upcase}_in_#{exonid_strand[0]}"))
-    # New feature qualifier according to https://www.ebi.ac.uk/ols/ontologies/so/terms/graph?iri=http://purl.obolibrary.org/obo/SO_0000110
-    # nucleotide_motif
-    # Description: A region of nucleotide sequence corresponding to a known motif.
-    # Synonyms: INSDC_note:nucleotide_motif, nucleotide motif, INSDC_feature:misc_feature
-    # Short id: SO:0000714 (iri: http://purl.obolibrary.org/obo/SO:0000714)
-    # This format will be needed for the GFF3
-
+    feat.append(Bio::Feature::Qualifier.new('nucleotide motif', "#{@target.upcase}_in_#{exonid_strand[0]}"))
     feat.append(Bio::Feature::Qualifier.new('strand', exonid_strand[1]))
+    # Here I add the new Qualifiers nucleotide motif and strand
 
     @gff_genes.push "#{gene_id}\t.\t#{feat.feature}\t#{target[0]}\t#{target[1]}\t.\t#{exonid_strand[1]}\t.\tID=#{exonid_strand[0]}"
-    # We print the feature in the GFF3 gene file
+    # Here I push all the values to the array gff_genes to then create the file
 
     exon_features << feat
   end
-
   bioseq.features.concat(exon_features) # We add the new features created to the existing ones
-
 end
 
 def get_chromosome (gene_id, sequence)
@@ -184,7 +176,7 @@ def get_chromosome (gene_id, sequence)
 
 end
 
-def convert_to_chr(gene, targets, chromosome)
+def get_chr_coordinates(gene, targets, chromosome)
   # With the gene ID, the hash containing the targets, and the information about the chromosome,
   # I translate the coordinates to the ones refering to the chromosome.
   # Then I push it to the array gff_chr
@@ -192,7 +184,7 @@ def convert_to_chr(gene, targets, chromosome)
   targets.each do |positions, exon_strand|
     pos_ini_chr = chromosome[1].to_i + positions[0].to_i
     pos_end_chr = chromosome[1].to_i + positions[1].to_i
-    @gff_chr.push "#{chromosome[0]}\t.\tNA_motif\t#{pos_ini_chr}\t#{pos_end_chr}\t.\t#{exon_strand[1]}\t.\tID=#{exon_strand[0]};parent=#{gene}"
+    @gff_chr.push "#{chromosome[0]}\t.\tnucleotide motif\t#{pos_ini_chr}\t#{pos_end_chr}\t.\t#{exon_strand[1]}\t.\tID=#{exon_strand[0]};parent=#{gene}"
   end
 end
 
@@ -240,11 +232,12 @@ def init_assingment()
     unless sequence == nil
       target_hash = get_exons_targets(sequence)
       if target_hash.empty?
+        puts "CTTCTT SEQUENCE NOT FOUND FOR #{gene.gene_id} "
         @no_targets.push(gene.gene_id)
       else
         add_features(gene.gene_id, target_hash, sequence) # We create new features and add them to each seq_obj
-        chr = get_chromosome(gene.gene_id, sequence) # We return the chromosome number and postions
-        convert_to_chr(gene.gene_id, target_hash, chr) # We convert the positions to the ones that correspond in the chromosome
+        chr = get_chromosome(gene.gene_id, sequence) # We return the chromosome number and positions
+        get_chr_coordinates(gene.gene_id, target_hash, chr) # We convert the positions to the ones that correspond in the chromosome
       end
     end
   end
@@ -397,3 +390,5 @@ end
 
 
 init_assingment
+
+puts "Finished."
