@@ -9,4 +9,5 @@ gem 'rest-client'
 gem 'sqlite3'
 gem 'activesupport'
 gem install ncbi-blast-dbs
+gem install blast -v 2.2.25.RC3 --pre
 gem install bio -v 1.5.0
