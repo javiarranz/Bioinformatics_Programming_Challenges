@@ -5,23 +5,28 @@ require 'bio'
 require 'stringio'
 require 'io/console'
 
+$E_VAL = 10 ** -12
+$OVERLAP = 50
 
 @pep_filename = 'pep_javier.fa'
 @tair_filename = 'TAIR10_seq_20110103_representative_gene_model_updated'
 
+@best_reciprical_hits = []
+@number_of_BRH = 1
+
 def convert_to_hash(file)
-  path = './assignment_4/fixtures/'
+  path = './fixtures/'
 
   bio = Bio::FastaFormat.open(path + file)
 
   hash = Hash.new
-  bio.each do |seq_target|
-    hash[(seq_target.entry_id).to_s] = (seq_target.seq).to_s
+  bio.each do |sequence|
+    hash[(sequence.entry_id).to_s] = (sequence.seq).to_s
   end
-hash
+  hash
 end
 
-def make_blast(filename,dbtype, output)
+def make_blast(filename, dbtype, output)
   path = './dao/'
   system("makeblastdb -in '#{filename}' -dbtype #{dbtype} -out '#{path}#{output}'")
 end
@@ -33,9 +38,10 @@ def new_file(name_file, items_list, format)
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
 
-File.open("./assignment_4/outputs/" + name_file + format, "w") do |file|
-    items_list.each do |row|
-      file.puts row
+  File.open("./outputs/" + name_file + format, "w") do |file|
+    file.puts "These are the ORTHOLOGS that were found in the files #{@pep_filename} and #{@tair_filename}"
+    items_list.each do |list|
+      file.puts list
     end
   end
 end
@@ -48,8 +54,8 @@ def init_assingment()
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
 
-  pep_hash = convert_to_hash('pep_javier.fa')
-  tair_hash = convert_to_hash('TAIR10_seq_20110103_representative_gene_model_updated')
+  pep_hash = convert_to_hash(@pep_filename)
+  tair_hash = convert_to_hash(@tair_filename)
 
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
@@ -68,42 +74,88 @@ def init_assingment()
   puts '  ** Bio::Blast.local => 2'
   if dbtype_1 == 'nucl' and dbtpye_2 == 'nucl' # Both files contain genomes
     factory_sp1 = Bio::Blast.local('blastn', './dao/database_sp_1')
-    factory_sp2 = Bio::Blast.local('blastn', './assignment_4/dao/database_sp_2')
+    factory_sp2 = Bio::Blast.local('blastn', './dao/database_sp_2')
 
   elsif dbtype_1 == 'nucl' and dbtpye_2 == 'prot' # First file contains a genome and the second one a proteome
-    factory_sp1 = Bio::Blast.local('tblastn', "./assignment_4/dao/database_sp_1")
-    factory_sp2 = Bio::Blast.local('blastx', "./assignment_4/dao/database_sp_2")
+    factory_sp1 = Bio::Blast.local('tblastn', "./dao/database_sp_1")
+    factory_sp2 = Bio::Blast.local('blastx', "./dao/database_sp_2")
 
   elsif dbtype_1 == 'prot' and dbtpye_2 == 'nucl' # First file contains a proteome and the second one a genome
     factory_sp1 = Bio::Blast.local('blastx', './dao/database_sp_1')
-    factory_sp2 = Bio::Blast.local('tblastn', "./assignment_4/dao/database_sp_2")
+    factory_sp2 = Bio::Blast.local('tblastn', "./dao/database_sp_2")
 
   elsif dbtype_1 == 'prot' and type_target_file == 'p' # Both files contain proteomes
-    factory_sp1 = Bio::Blast.local('blastp', "./assignment_4/dao/database_sp_1")
-    factory_sp2 = Bio::Blast.local('blastp', "./assignment_4/dao/database_sp_2")
+    factory_sp1 = Bio::Blast.local('blastp', "./dao/database_sp_1")
+    factory_sp2 = Bio::Blast.local('blastp', "./dao/database_sp_2")
 
   end
-
   puts '  ** finished Bio::Blast.local'
 
+  pep_bio = Bio::FastaFormat.open('./fixtures/' + @pep_filename)
+  tair_bio = Bio::FastaFormat.open('./fixtures/' + @tair_filename)
 
 
-  # puts "\n\n\n\n"
-  # puts "##################################"
-  # puts "####                          ####"
-  # puts "####     XXXXXXXXXXXXXXXXX    ####"
-  # puts "####                          ####"
-  # puts "##################################"
-  # puts "\n\n"
-  # #Lets create an output with the GENES that didn't have the target sequence as a record
-  #
-  # puts "RESULTS: ________________________________________"
-  # puts ""
-  # puts ""
-  # puts ""
-  # puts ""
-  #
 
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
+  # NOW I ITERATE EACH pep SEQUENCE
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
+
+  puts '    *Finding hits..'
+  pep_bio.each do |sequence|
+
+    sequence_id = (sequence.entry_id).to_s # We store the ID in search_file to later know if it is a reciprocal best hit
+    report_target = factory_sp2.query(sequence)
+
+    if report_target.hits[0] # Only if there have been hits continue.
+      target_id = (report_target.hits[0].definition.match(/(\w+\.\w+)|/)).to_s # We get ID that will correspond to target_file ID
+      if (report_target.hits[0].evalue <= $E_VAL) and (report_target.hits[0].overlap >= $OVERLAP) # We check the stablished parameters
+        report_search = factory_sp1.query(">#{target_id}\n#{tair_hash[target_id]}")
+        # We look in the hash with the previous ID to get the sequence and query the factory
+        if report_search.hits[0] # Again, only continue if there have been hits
+          match = (report_search.hits[0].definition.match(/(\w+\.\w+)|/)).to_s # We get the ID that will match with the ID in the search_file
+          if (report_search.hits[0].evalue <= $E_VAL) and (report_search.hits[0].overlap >= $OVERLAP) # Check parameters
+            if sequence_id == match # If the match and the search_file ID match, it means that this is a reciprocal best hit
+              puts '        - MATCH FOUND!'
+              @best_reciprical_hits.push("#{sequence_id}\t\t#{target_id}") # We write it in the output file')
+              puts "          #{sequence_id}\t ==>\t#{target_id}"
+
+              @number_of_BRH += 1
+
+            end
+          end
+        end
+      end
+    end
+  end
+
+
+
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
+  # FINALLY, I CREATE A NEW FILE WHERE I'M GOING TO WRITE ALL THE ORTHOLOGS
+  # ---------------------------------------------------------------------------------------------------------#
+  # ---------------------------------------------------------------------------------------------------------#
+
+  new_file('orthologs', @best_reciprical_hits,'.txt')
+
+
+
+  puts "\n\n\n\n"
+  puts "##################################"
+  puts "####                          ####"
+  puts "####     Results in file      ####"
+  puts "####      orthologs.txt       ####"
+  puts "####                          ####"
+  puts "##################################"
+  puts "\n\n"
+
+  puts "RESULTS: ________________________________________"
+  puts ""
+  puts "Number of orthologs found:"
+  puts "  ==> #{@number_of_BRH}"
+  puts ""
 
 end
 
@@ -118,6 +170,8 @@ init_assingment
 
 puts "Finished."
 
+
 #____________________________________________________________________________________________________________________#
 #
+
 
