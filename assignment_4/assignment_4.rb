@@ -1,6 +1,4 @@
 require 'rest-client'
-# require './lib/file_parser'
-# require './models/Gene'
 require 'bio'
 require 'stringio'
 require 'io/console'
@@ -9,7 +7,7 @@ $E_VAL = 10 ** -12
 $OVERLAP = 50
 
 @pep_filename = 'pep_javier.fa'
-@tair_filename = 'TAIR10_seq_20110103_representative_gene_model_updated'
+@tair_filename = 'TAIR10_javier'
 
 @best_reciprical_hits = []
 @number_of_BRH = 1
@@ -122,6 +120,7 @@ def init_assingment()
               puts "          #{sequence_id}\t ==>\t#{target_id}"
 
               @number_of_BRH += 1
+              puts "                                  TOTAL: #{@number_of_BRH}"
 
             end
           end
