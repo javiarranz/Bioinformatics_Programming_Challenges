@@ -154,21 +154,21 @@ def init_assingment()
 
   pep_bio.each do |sequence|
     n_of_sequences += 1
-    sequence_id = (sequence.entry_id).to_s # We store the ID in search_file to later know if it is a reciprocal best hit
-    report_target = factory_sp2.query(sequence)
+    sequence_id_sp1 = (sequence.entry_id).to_s # We store the ID in search_file to later know if it is a reciprocal best hit
+    report_sp2 = factory_sp2.query(sequence)
 
-    if report_target.hits[0] # Only if there have been hits continue.
-      target_id = (report_target.hits[0].definition.match(/(\w+\.\w+)|/)).to_s # We get ID that will correspond to target_file ID
-      if (report_target.hits[0].evalue <= $E_VAL) and (report_target.hits[0].overlap >= $OVERLAP) # We check the stablished parameters
-        report_search = factory_sp1.query(">#{target_id}\n#{tair_hash[target_id]}")
+    if report_sp2.hits[0] # To continue only if there are hits
+      sequence_id_sp2 = (report_sp2.hits[0].definition.match(/(\w+\.\w+)|/)).to_s # We get ID that will correspond to second species ID
+      if (report_sp2.hits[0].evalue <= $E_VAL) and (report_sp2.hits[0].overlap >= $OVERLAP) # We check the parameters
+        report_sp1 = factory_sp1.query(">#{sequence_id_sp2}\n#{tair_hash[sequence_id_sp2]}")
         # We look in the hash with the previous ID to get the sequence and query the factory
-        if report_search.hits[0] # Again, only continue if there have been hits
-          match = (report_search.hits[0].definition.match(/(\w+\.\w+)|/)).to_s # We get the ID that will match with the ID in the search_file
-          if (report_search.hits[0].evalue <= $E_VAL) and (report_search.hits[0].overlap >= $OVERLAP) # Check parameters
-            if sequence_id == match # If the match and the search_file ID match, it means that this is a reciprocal best hit
+        if report_sp1.hits[0] # Again, only continue if there are hits
+          match = (report_sp1.hits[0].definition.match(/(\w+\.\w+)|/)).to_s # We get the ID that will match with the ID in the search_file
+          if (report_sp1.hits[0].evalue <= $E_VAL) and (report_sp1.hits[0].overlap >= $OVERLAP) # Check parameters
+            if sequence_id_sp1 == match # If the match and the search_file ID match, it means that this is a reciprocal best hit
               puts '        - MATCH FOUND!'
-              @best_reciprical_hits.push("#{sequence_id}\t\t#{target_id}") # We write it in the output file')
-              puts "          #{sequence_id}\t ==>\t#{target_id}"
+              @best_reciprical_hits.push("#{sequence_id_sp1}\t\t#{sequence_id_sp2}") # We write it in the output file')
+              puts "          #{sequence_id_sp1}\t ==>\t#{sequence_id_sp2}"
 
               @number_of_BRH += 1
               puts "                                  TOTAL: #{@number_of_BRH}"
