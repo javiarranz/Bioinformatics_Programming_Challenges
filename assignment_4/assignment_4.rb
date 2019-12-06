@@ -3,17 +3,58 @@ require 'bio'
 require 'stringio'
 require 'io/console'
 
-$E_VAL = 10 ** -12
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+# BLAST PARAMETERS SELECTED
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+
+$E_VAL = 10 ** -6
+
+# The e-value was set according to a few papers that I found in Pubmed after writting "orthologs detection with blast"
+# in the Pubmed Browser. Here I include the Title, the link, and the sentence where I found what I was looking for.
+# For the first paper:
+
+      # TITLE: Quickly Finding Orthologs as Reciprocal Best Hits with BLAT, LAST, and UBLAST: How Much Do We Miss?
+      # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4094424/
+      #         => "The options for NCBI's BLAST different to the defaults were a maximum E-value threshold of 1x10^6
+      #         (-evalue 1e-6)and a final Smith-Waterman alignment (-use_sw_tback).""
+
+# Then for the second one:
+
+      # TITLE: Choosing BLAST options for better detection of orthologs as reciprocal best hits.
+      # https://www.ncbi.nlm.nih.gov/pubmed/18042555
+      #         => "We ran NCBI’s BLASTP comparisons of all the proteins encoded by the annotated genes of E.coli K12
+      #         against all the proteins encoded by the genes annotated in any other genome, and vice versa, with a
+      #         maximum E-value threshold of 1x10^6"
+
 $OVERLAP = 50
 
-@pep_filename = 'pep_javier.fa'
-@tair_filename = 'TAIR10_javier'
+# For the overlap (coverage) we set this value according to the same first paper I wrote before, where they say this:
+      #         => "We also required coverage of at least 50% of any of the protein sequences in the alignments."
+
+
+
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+# FILE NAMES --> can be changed in case other files are required
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+
+@name_first_file = 'pep_javier.fa'
+@name_second_file = 'TAIR10_javier'
 
 @best_reciprical_hits = []
 @number_of_BRH = 1
 
 def convert_to_hash(file)
-  path = './fixtures/'
+  #-----------------------------------------------------------------
+  #-----------------------------------------------------------------
+  # This function convers a file to a hash
+  #-----------------------------------------------------------------
+  #-----------------------------------------------------------------
+
+path = './assignment_4/fixtures/'
 
   bio = Bio::FastaFormat.open(path + file)
 
@@ -25,19 +66,26 @@ def convert_to_hash(file)
 end
 
 def make_blast(filename, dbtype, output)
-  path = './dao/'
-  system("makeblastdb -in '#{filename}' -dbtype #{dbtype} -out '#{path}#{output}'")
+  #-----------------------------------------------------------------
+  #-----------------------------------------------------------------
+  # This function creates a database using blast when given a
+  # filename, a dbtype and a name for the output
+  #-----------------------------------------------------------------
+  #-----------------------------------------------------------------
+
+path = './dao/'
+  system("makeblastdb -in './fixtures/#{filename}' -dbtype #{dbtype} -out '#{path}#{output}'")
 end
 
 def new_file(name_file, items_list, format)
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
-  # FUNCTION TO CREATE A NEW FILE
+  # FUNCTION TO CREATE THE NEW FILE
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
 
   File.open("./outputs/" + name_file + format, "w") do |file|
-    file.puts "These are the ORTHOLOGS that were found in the files #{@pep_filename} and #{@tair_filename}"
+    file.puts "These are the ORTHOLOGS that were found in the files #{@name_first_file} and #{@name_second_file}"
     items_list.each do |list|
       file.puts list
     end
@@ -52,8 +100,8 @@ def init_assingment()
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
 
-  pep_hash = convert_to_hash(@pep_filename)
-  tair_hash = convert_to_hash(@tair_filename)
+  pep_hash = convert_to_hash(@name_first_file)
+  tair_hash = convert_to_hash(@name_second_file)
 
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
@@ -64,9 +112,9 @@ def init_assingment()
   dbtpye_2 = 'nucl'
 
   puts '*** Making first file blast database...'
-  #make_blast(@pep_filename,'prot', 'database_sp_1')
+  make_blast(@name_first_file,'prot', 'database_sp_1')
   puts '*** Making second file blast database...'
-  #make_blast(@tair_filename,'nucl', 'database_sp_2')
+  make_blast(@name_second_file,'nucl', 'database_sp_2')
 
   puts '  ** Bio::Blast.local => 1'
   puts '  ** Bio::Blast.local => 2'
@@ -89,8 +137,8 @@ def init_assingment()
   end
   puts '  ** finished Bio::Blast.local'
 
-  pep_bio = Bio::FastaFormat.open('./fixtures/' + @pep_filename)
-  tair_bio = Bio::FastaFormat.open('./fixtures/' + @tair_filename)
+  pep_bio = Bio::FastaFormat.open('./fixtures/' + @name_first_file)
+  tair_bio = Bio::FastaFormat.open('./fixtures/' + @name_second_file)
 
 
 
@@ -101,8 +149,11 @@ def init_assingment()
   # ---------------------------------------------------------------------------------------------------------#
 
   puts '    *Finding hits..'
-  pep_bio.each do |sequence|
 
+  n_of_sequences= 0
+
+  pep_bio.each do |sequence|
+    n_of_sequences += 1
     sequence_id = (sequence.entry_id).to_s # We store the ID in search_file to later know if it is a reciprocal best hit
     report_target = factory_sp2.query(sequence)
 
@@ -121,6 +172,8 @@ def init_assingment()
 
               @number_of_BRH += 1
               puts "                                  TOTAL: #{@number_of_BRH}"
+              puts "                                                                    #{n_of_sequences*100/(pep_hash.length)}%"
+              puts "                                                                    _______"
 
             end
           end
