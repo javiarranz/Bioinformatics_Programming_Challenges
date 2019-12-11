@@ -15,24 +15,23 @@ $E_VAL = 10 ** -6
 # in the Pubmed Browser. Here I include the Title, the link, and the sentence where I found what I was looking for.
 # For the first paper:
 
-      # TITLE: Quickly Finding Orthologs as Reciprocal Best Hits with BLAT, LAST, and UBLAST: How Much Do We Miss?
-      # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4094424/
-      #         => "The options for NCBI's BLAST different to the defaults were a maximum E-value threshold of 1x10^6
-      #         (-evalue 1e-6)and a final Smith-Waterman alignment (-use_sw_tback).""
+# TITLE: Quickly Finding Orthologs as Reciprocal Best Hits with BLAT, LAST, and UBLAST: How Much Do We Miss?
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4094424/
+#         => "The options for NCBI's BLAST different to the defaults were a maximum E-value threshold of 1x10^6
+#         (-evalue 1e-6)and a final Smith-Waterman alignment (-use_sw_tback).""
 
 # Then for the second one:
 
-      # TITLE: Choosing BLAST options for better detection of orthologs as reciprocal best hits.
-      # https://www.ncbi.nlm.nih.gov/pubmed/18042555
-      #         => "We ran NCBI’s BLASTP comparisons of all the proteins encoded by the annotated genes of E.coli K12
-      #         against all the proteins encoded by the genes annotated in any other genome, and vice versa, with a
-      #         maximum E-value threshold of 1x10^6"
+# TITLE: Choosing BLAST options for better detection of orthologs as reciprocal best hits.
+# https://www.ncbi.nlm.nih.gov/pubmed/18042555
+#         => "We ran NCBI’s BLASTP comparisons of all the proteins encoded by the annotated genes of E.coli K12
+#         against all the proteins encoded by the genes annotated in any other genome, and vice versa, with a
+#         maximum E-value threshold of 1x10^6"
 
 $OVERLAP = 50
 
 # For the overlap (coverage) we set this value according to the same first paper I wrote before, where they say this:
-      #         => "We also required coverage of at least 50% of any of the protein sequences in the alignments."
-
+#         => "We also required coverage of at least 50% of any of the protein sequences in the alignments."
 
 
 #-----------------------------------------------------------------
@@ -45,7 +44,7 @@ $OVERLAP = 50
 @name_second_file = 'TAIR10_javier'
 
 @best_reciprical_hits = []
-@number_of_BRH = 1
+@number_of_BRH = 0
 
 def convert_to_hash(file)
   #-----------------------------------------------------------------
@@ -54,7 +53,7 @@ def convert_to_hash(file)
   #-----------------------------------------------------------------
   #-----------------------------------------------------------------
 
-path = './assignment_4/fixtures/'
+  path = '.fixtures/'
 
   bio = Bio::FastaFormat.open(path + file)
 
@@ -73,7 +72,7 @@ def make_blast(filename, dbtype, output)
   #-----------------------------------------------------------------
   #-----------------------------------------------------------------
 
-path = './dao/'
+  path = './dao/'
   system("makeblastdb -in './fixtures/#{filename}' -dbtype #{dbtype} -out '#{path}#{output}'")
 end
 
@@ -92,6 +91,41 @@ def new_file(name_file, items_list, format)
   end
 end
 
+def create_factory(specie, dbtype_1, dbtype_2)
+
+  if dbtype_1 == 'nucl' and dbtype_2 == 'nucl' # Both files contain genomes
+    p1 = p2 = 'blastn'
+  elsif dbtype_1 == 'nucl' and dbtype_2 == 'prot' # First file contains a genome and the second one a proteome
+    p1 = 'tblastn'
+    p2 = 'blastx'
+  elsif dbtype_1 == 'prot' and dbtype_2 == 'nucl' # First file contains a proteome and the second one a genome
+    p1 = 'blastx'
+    p2 = 'tblastn'
+  elsif dbtype_1 == 'prot' and type_target_file == 'p' # Both files contain proteomes
+    p1 = p2 = 'blastp'
+  end
+
+  if specie == 1
+    return Bio::Blast.local(p1, './dao/database_sp_1')
+  end
+  if specie == 2
+    return Bio::Blast.local(p2, './dao/database_sp_2')
+  end
+end
+
+def bonus
+  puts " ------------ BONUS ------------"
+  puts "Reciprocal-best-BLAST is only the first step in demonstrating that two genes are orthologous.
+Write a few sentences describing how you would continue to analyze the putative orthologues you just discovered, to prove that they really are orthologues.
+You DO NOT need to write the code - just describe in words what that code would do.
+(You can learn about orthology analysis by reading online, and that will give you ideas of how to take the next step)"
+
+  puts "  ==> I would do a phylogenetic analysis of the BRH to build a tree and see if they are separated after a speciation event"
+  puts "  ==> I would use clustal-omega to build and see the tree for a further comparison"
+
+end
+
+
 def init_assingment()
   puts "ASSIGNMENT 4"
   # ---------------------------------------------------------------------------------------------------------#
@@ -109,37 +143,24 @@ def init_assingment()
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
   dbtype_1 = 'prot'
-  dbtpye_2 = 'nucl'
+  dbtype_2 = 'nucl'
 
   puts '*** Making first file blast database...'
-  make_blast(@name_first_file,'prot', 'database_sp_1')
+  make_blast(@name_first_file, 'prot', 'database_sp_1')
   puts '*** Making second file blast database...'
-  make_blast(@name_second_file,'nucl', 'database_sp_2')
+  make_blast(@name_second_file, 'nucl', 'database_sp_2')
 
   puts '  ** Bio::Blast.local => 1'
   puts '  ** Bio::Blast.local => 2'
-  if dbtype_1 == 'nucl' and dbtpye_2 == 'nucl' # Both files contain genomes
-    factory_sp1 = Bio::Blast.local('blastn', './dao/database_sp_1')
-    factory_sp2 = Bio::Blast.local('blastn', './dao/database_sp_2')
 
-  elsif dbtype_1 == 'nucl' and dbtpye_2 == 'prot' # First file contains a genome and the second one a proteome
-    factory_sp1 = Bio::Blast.local('tblastn', "./dao/database_sp_1")
-    factory_sp2 = Bio::Blast.local('blastx', "./dao/database_sp_2")
+  factory_sp1 = create_factory(1, dbtype_1, dbtype_2)
+  factory_sp2 = create_factory(2, dbtype_1, dbtype_2)
 
-  elsif dbtype_1 == 'prot' and dbtpye_2 == 'nucl' # First file contains a proteome and the second one a genome
-    factory_sp1 = Bio::Blast.local('blastx', './dao/database_sp_1')
-    factory_sp2 = Bio::Blast.local('tblastn', "./dao/database_sp_2")
 
-  elsif dbtype_1 == 'prot' and type_target_file == 'p' # Both files contain proteomes
-    factory_sp1 = Bio::Blast.local('blastp', "./dao/database_sp_1")
-    factory_sp2 = Bio::Blast.local('blastp', "./dao/database_sp_2")
-
-  end
   puts '  ** finished Bio::Blast.local'
 
   pep_bio = Bio::FastaFormat.open('./fixtures/' + @name_first_file)
   tair_bio = Bio::FastaFormat.open('./fixtures/' + @name_second_file)
-
 
 
   # ---------------------------------------------------------------------------------------------------------#
@@ -150,7 +171,7 @@ def init_assingment()
 
   puts '    *Finding hits..'
 
-  n_of_sequences= 0
+  n_of_sequences = 0
 
   pep_bio.each do |sequence|
     n_of_sequences += 1
@@ -172,7 +193,7 @@ def init_assingment()
 
               @number_of_BRH += 1
               puts "                                  TOTAL: #{@number_of_BRH}"
-              puts "                                                                    #{n_of_sequences*100/(pep_hash.length)}%"
+              puts "                                                                    #{n_of_sequences * 100 / (pep_hash.length)}%"
               puts "                                                                    _______"
 
             end
@@ -183,15 +204,13 @@ def init_assingment()
   end
 
 
-
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
   # FINALLY, I CREATE A NEW FILE WHERE I'M GOING TO WRITE ALL THE ORTHOLOGS
   # ---------------------------------------------------------------------------------------------------------#
   # ---------------------------------------------------------------------------------------------------------#
 
-  new_file('orthologs', @best_reciprical_hits,'.txt')
-
+  new_file('orthologs', @best_reciprical_hits, '.txt')
 
 
   puts "\n\n\n\n"
@@ -212,13 +231,13 @@ def init_assingment()
 end
 
 
-
 # ------------------------------------------------#
 # HERE WE CALL THE FUNCTION TO INIT THE ASSIGNMENT
 # ------------------------------------------------#
 
 
 init_assingment
+bonus
 
 puts "Finished."
 
