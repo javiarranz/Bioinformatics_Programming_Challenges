@@ -56,6 +56,8 @@ get all PubMed references for the pathway with the name “Degradation of the ex
 ```
 output in a list
 ```
+
+BONUS
 ----------------------------------------------------------------
 find the AGI codes and gene names for all Arabidopsis thaliana  proteins that have a protein function annotation description that mentions “pattern formation”
 ```
