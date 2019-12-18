@@ -7,6 +7,8 @@ Bioinformatics Programming Challenges
 
 ### **QUERIES RESULTS**
 
+UNIPROT
+----------------------------------------------------------------
 How many protein records are in UniProt? 
 ```
 281303435
@@ -33,6 +35,7 @@ How many species have at least one protein record?
 984622
 ```
 
+ATLAS
 ----------------------------------------------------------------
 What is the Affymetrix probe ID for the Arabiodopsis Apetala3 gene?  
 ```
@@ -42,6 +45,8 @@ get the experimental description for all experiments where the Arabidopsis Apeta
 ```
 ??
 ```
+
+REACTOME
 ----------------------------------------------------------------
 How many REACTOME pathways are assigned to Arabidopsis (taxon 3702)?
 ```
